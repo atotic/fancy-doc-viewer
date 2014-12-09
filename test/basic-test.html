@@ -1,0 +1,43 @@
+<!--
+    @license MIT License http://choosealicense.com/licenses/mit/
+    Copyright (c) 2014 Aleks Totic
+-->
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>poly-doc</title>
+
+  <script src="../../webcomponentsjs/webcomponents.min.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+
+  <!-- Step 1: import the element to test -->
+  <link rel="import" href="../poly-doc.html">
+</head>
+<body>
+
+  <!-- You use the document as a place to set up your fixtures. -->
+  <poly-doc></poly-doc>
+
+  <script>
+    var myEl = document.querySelector('poly-doc');
+
+    suite('<poly-doc>', function() {
+
+      test('displays element documents', function() {
+      });
+
+      test('displays text documents', function() {
+      });
+
+      test('displays markdown documents', function(done) {
+      });
+
+      test('menu hierarchy', function(done) {
+      });
+    });
+  </script>
+
+</body>
+</html>

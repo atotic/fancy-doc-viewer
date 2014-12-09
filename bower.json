@@ -1,0 +1,27 @@
+{
+  "name": "polydoc",
+  "version": "0.0.1",
+  "authors": [
+    "Aleks Totic <a@totic.org>"
+  ],
+  "description": "Pretty docs for your site, polymer-style",
+  "keywords": [
+    "web-component",
+    "web-components",
+    "polymer",
+    "jsdoc"
+  ],
+  "main": "polydoc.html",
+  "license": "MIT",
+  "homepage": "https://github.com/atotic/polydoc/",
+  "ignore": [
+    "/.*",
+    "/tests/"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#^0.5.1"
+  },
+  "devDependencies": {
+    "web-component-tester": "Polymer/web-component-tester"
+  }
+}
