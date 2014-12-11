@@ -1,40 +1,50 @@
-<!--
-    @license
-    Copyright (c) 2014 The Polymer Project Authors. All rights reserved.
-    This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-    The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-    The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-    Code distributed by Google as part of the polymer project is also
-    subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
--->
-<link rel="import" href="../polymer/polymer.html">
+<!--@license MIT License Copyright (c) 2014 Aleks Totic -->
+
+<link rel="import" href="elements/fancy-doc-toc.html">
+<link rel="import" href="../core-drawer-panel/core-drawer-panel.html">
 
 <!--
-Element providing solution to no problem in particular.
+Polymer-style docs for your own site
 
 ##### Example
 
-    <seed-element></seed-element>
+    <fancy-doc-viewer sources=""></fancy-doc-viewer>
 
-@element seed-element
-@blurb Element providing solution to no problem in particular.
+@element fancy-doc-viewer
+@blurb Polymer-style docs for your own site.
 @status alpha
-@homepage http://polymerlabs.github.io/seed-element
+@homepage http://github.com/atotic/fancy-doc-viewer
 -->
-<polymer-element name="seed-element" attributes="notitle author">
+<polymer-element name="fancy-doc-viewer" attributes="sourceSet" horizontal layout>
 
   <template>
-
-    <link rel="stylesheet" href="seed-element.css">
-
-    <h1>Hello from seed-element</h1>
-    <content></content>
-
+    <link rel="stylesheet" href="fancy-doc-viewer.css">
+    <core-drawer-panel drawerWidth="12em">
+      <core-header-panel drawer>
+        <core-toolbar>
+          <div flex></div><core-icon src="/favicon.ico"></core-icon><div flex></div>
+        </core-toolbar>
+        <fancy-doc-toc></fancy-doc-toc>
+      </core-header-panel>
+      <core-header-panel main>
+        <div main>RHS</div>
+      </core-header-panel>
+    </core-drawer-panel>
   </template>
 
   <script>
 
     Polymer({
+      /**
+       * Files to parse for docs, as a hierarchy
+       * @attribute sourceSet
+       * @type object
+       */
+      sourceSet: {
+        general: [],
+        elements: [],
+        tests: []
+      },
       /**
        * The `author` attribute sets an initial author
        *
@@ -54,9 +64,6 @@ Element providing solution to no problem in particular.
       fancy: false,
 
       ready: function() {
-        // Ready is a lifecycle callback.
-        // You can do setup work in here.
-        // More info: http://www.polymer-project.org/docs/polymer/polymer.html#lifecyclemethods
       },
 
       /**

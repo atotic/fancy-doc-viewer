@@ -1,29 +1,32 @@
-<!--
-    @license
-    Copyright (c) 2014 The Polymer Project Authors. All rights reserved.
-    This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-    The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-    The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-    Code distributed by Google as part of the polymer project is also
-    subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
--->
+<!-- @license MIT License  Copyright (c) 2014 Aleks Totic -->
 <!doctype html>
 <html>
 <head>
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
-  <title>seed-element Demo</title>
+  <title>fancy-doc-viewer Demo</title>
 
   <script src="../webcomponentsjs/webcomponents.min.js"></script>
-  <link rel="import" href="polydoc.html">
+  <script src="../webcomponentsjs/webcomponents.min.js"></script>
 
+  <link rel="import" href="../sanity-check/sanity-check.html">
+  <link rel="import" href="fancy-doc-viewer.html">
+  <style>
+    body {
+      margin: 0;
+    }
+  </style>
 </head>
-<body unresolved>
-
-  <p>An example of using <code>&lt;poly-doc&gt;</code>:</p>
-
-  <seed-element>
-    <h2>Hello seed-element</h2>
-  </seed-element>
-
+<body>
+  <sanity-check></sanity-check>
+  <template id="auto-fancy-doc-viewer" is="auto-binding" sourceSet="{{sourceSet}}">
+    <fancy-doc-viewer sources="{{sourceSet}}"></fancy-doc-viewer>
+  </template>
+<script>
+  document.querySelector("#auto-fancy-doc-viewer").sourceSet = {
+    Elements: [
+      "/fancy-doc-viewer/fancy-doc-viewer.html",
+    ]
+  }
+</script>
 </body>
 </html>

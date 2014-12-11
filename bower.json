@@ -1,5 +1,5 @@
 {
-  "name": "polydoc",
+  "name": "fancy-doc-viewer",
   "version": "0.0.1",
   "authors": [
     "Aleks Totic <a@totic.org>"
@@ -13,13 +13,22 @@
   ],
   "main": "polydoc.html",
   "license": "MIT",
-  "homepage": "https://github.com/atotic/polydoc/",
+  "homepage": "https://github.com/atotic/fancy-doc-viewer/",
   "ignore": [
     "/.*",
     "/tests/"
   ],
   "dependencies": {
-    "polymer": "Polymer/polymer#^0.5.1"
+    "core-drawer-panel": "Polymer/core-drawer-panel",
+    "core-header-panel": "Polymer/core-header-panel",
+    "core-icon-button": "Polymer/core-icon-button",
+    "core-icons": "Polymer/core-icons",
+    "core-item": "Polymer/core-item",
+    "core-menu": "Polymer/core-menu",
+    "core-toolbar": "Polymer/core-toolbar",
+    "context-free-parser": "Polymer/context-free-parser",
+    "marked-element": "PolymerLabs/marked-element",
+    "prettify-element": "Polymer/prettify-element"
   },
   "devDependencies": {
     "web-component-tester": "Polymer/web-component-tester"

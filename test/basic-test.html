@@ -7,35 +7,45 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
-  <title>poly-doc</title>
+  <title>fancy-doc-viewer</title>
 
   <script src="../../webcomponentsjs/webcomponents.min.js"></script>
   <script src="../../web-component-tester/browser.js"></script>
 
   <!-- Step 1: import the element to test -->
-  <link rel="import" href="../poly-doc.html">
+  <link rel="import" href="../fancy-doc-viewer.html">
 </head>
 <body>
 
   <!-- You use the document as a place to set up your fixtures. -->
-  <poly-doc></poly-doc>
 
   <script>
-    var myEl = document.querySelector('poly-doc');
+    var fancyDocToc = document.createElement('fancy-doc-toc');
 
-    suite('<poly-doc>', function() {
-
-      test('displays element documents', function() {
+    suite("<fancy-doc-toc", function() {
+      test("menuFromHierarchy", function() {
+        var menu = fancyDocToc.menuFromHierarchy( {
+          documents: [
+            { name: "doc1", href: "#yo"},
+            { name: "doc", href: "#yo"},
+            { name: "doc", href: "#yo"}
+          ],
+          elements: [
+            { name: "el", href: "#el"},
+            { name: "el", href: "#el"},
+            { name: "el", href: "#el"},
+            { name: "el", href: "#el"}
+          ],
+          tests: [
+            { name: "all", href: "#el"}
+          ]
+        });
+        assert.equal( Array.isArray(menu), true);
+        assert.equal( menu[0].items[0].title, 'doc1');
       });
+    });
+    suite('<fancy-doc-viewer>', function() {
 
-      test('displays text documents', function() {
-      });
-
-      test('displays markdown documents', function(done) {
-      });
-
-      test('menu hierarchy', function(done) {
-      });
     });
   </script>
 

@@ -1,0 +1,14 @@
+/*  @license MIT License  Copyright (c) 2014 Aleks Totic */
+
+:host {
+  display: block;
+  width: 100vw;
+  min-height: 100vh;
+}
+
+[drawer] {
+  background-color: #DDD;
+}
+fancy-doc-toc /deep/ core-submenu > core-item {
+  min-height: 28px;
+}
