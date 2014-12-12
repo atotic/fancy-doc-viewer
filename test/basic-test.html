@@ -20,9 +20,11 @@
   <!-- You use the document as a place to set up your fixtures. -->
 
   <script>
-    var fancyDocToc = document.createElement('fancy-doc-toc');
 
     suite("<fancy-doc-toc", function() {
+
+      var fancyDocToc = document.createElement('fancy-doc-toc');
+
       test("menuFromHierarchy", function() {
         var menu = fancyDocToc.menuFromHierarchy( {
           documents: [
@@ -31,8 +33,6 @@
             { name: "doc", href: "#yo"}
           ],
           elements: [
-            { name: "el", href: "#el"},
-            { name: "el", href: "#el"},
             { name: "el", href: "#el"},
             { name: "el", href: "#el"}
           ],
@@ -44,7 +44,27 @@
         assert.equal( menu[0].items[0].title, 'doc1');
       });
     });
+
     suite('<fancy-doc-viewer>', function() {
+      var fancyDocViewer = document.createElement('fancy-doc-viewer');
+
+      test("computeHierarchy", function() {
+        fancyDocViewer.sourceSet = {
+          Documents: [
+            "/fancy-doc-viewer/README.md",
+            "/fancy-doc-viewer/README.md"
+          ],
+          Elements: [
+            "/fancy-doc-viewer/fancy-doc-viewer.html",
+          ],
+          Tests: [
+            "/fancy-doc-viewer/test/index.html"
+          ]
+        };
+        assert.equal( fancyDocViewer.hierarchy.Documents[0].name, "README");
+        assert.equal( fancyDocViewer.hierarchy.Documents[0].href, "#README.md");
+        assert.equal( fancyDocViewer.hierarchy.Documents[1].href, "#README.md1");
+      });
 
     });
   </script>

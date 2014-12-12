@@ -1,20 +1,43 @@
 <!--@license MIT License Copyright (c) 2014 Aleks Totic -->
 
-<link rel="import" href="elements/fancy-doc-toc.html">
 <link rel="import" href="../core-drawer-panel/core-drawer-panel.html">
+<link rel="import" href="../core-header-panel/core-header-panel.html">
+<link rel="import" href="../core-ajax/core-ajax.html">
+
+<link rel="import" href="elements/fancy-doc-toc.html">
+<link rel="import" href="elements/fancy-doc-page.html">
 
 <!--
 Polymer-style docs for your own site
 
 ##### Example
-
-    <fancy-doc-viewer sources=""></fancy-doc-viewer>
-
+      <template id="auto" is="auto-binding" sourceSet="{{sourceSet}}">
+          <fancy-doc-viewer sourceSet="{{sourceSet}}"></fancy-doc-viewer>
+        </template>
+      <script>
+        document.querySelector("#auto").sourceSet = {
+          Documents: [
+            "README.md",
+            "docs/READMEHTML.html",
+            "docs/READMETXT.txt"
+          ],
+          Elements: [
+            "fancy-doc-viewer.html",
+          ],
+          Tests: [
+            "test/index.html"
+          ],
+          Bower: [
+            "../core-drawer-panel/core-drawer-panel.html"
+          ]
+        }
+      </script>    
 @element fancy-doc-viewer
 @blurb Polymer-style docs for your own site.
 @status alpha
 @homepage http://github.com/atotic/fancy-doc-viewer
 -->
+<script src="../context-free-parser/context-free-parser.js"></script>
 <polymer-element name="fancy-doc-viewer" attributes="sourceSet" horizontal layout>
 
   <template>
@@ -24,46 +47,145 @@ Polymer-style docs for your own site
         <core-toolbar>
           <div flex></div><core-icon src="/favicon.ico"></core-icon><div flex></div>
         </core-toolbar>
-        <fancy-doc-toc></fancy-doc-toc>
+        <fancy-doc-toc hierarchy="{{hierarchy}}"></fancy-doc-toc>
       </core-header-panel>
       <core-header-panel main>
-        <div main>RHS</div>
+        <core-toolbar></core-toolbar>
+        <fancy-doc-page 
+          mimeType="{{urlDataMap[ hashUrlMap [ route]].mimeType}}" 
+          data="{{urlDataMap[ hashUrlMap[ route] ].data}}"
+          url="{{hashUrlMap[route]}}"
+        >
+        </fancy-doc-page>
       </core-header-panel>
     </core-drawer-panel>
+    <!-- resource loading -->
+    <template repeat="{{ k in keys(hashUrlMap)}}">
+      <core-ajax auto url="{{ hashUrlMap[k] }}" on-core-complete="{{docLoaded}}"></core-ajax>
+    </template>
   </template>
 
   <script>
-
+    "use strict";
     Polymer({
       /**
-       * Files to parse for docs, as a hierarchy
-       * @attribute sourceSet
-       * @type object
+       Files to parse for docs, as a hierarchy
+       @attribute sourceSet
+       @type object
        */
       sourceSet: {
+        pleaseDefineSourceSet: [],
         general: [],
         elements: [],
-        tests: []
+        tests: [],
+        bower: []
       },
-      /**
-       * The `author` attribute sets an initial author
-       *
-       * @attribute author
-       * @type string
-       * @default 'Dimitri Glazkov'
-       */
-      author: 'Dimitri Glazkov',
-
-      /**
-       * `fancy` is a property that does something fancy.
-       *
-       * @property fancy
-       * @type bool
-       * @default false
-       */
-      fancy: false,
+      hashUrlMap: {}, // core-ajax loads data from this map
+      urlDataMap: {}, // url -> { mimeType: "", data: ""}
+      plainHtmlUrls: {}, // url -> true, list of html elements that should not be treated as html
+      computed: {
+        /**
+         @property hierarchy
+         */
+        hierarchy: 'computeHierarchy(sourceSet)',
+        routeMimeType: 'computeRouteMimeType( urlDataMap[ hashUrlMap[route]].mimeType)'
+      },
 
       ready: function() {
+        window.addEventListener('hashchange', this.parseLocationHash.bind(this));
+        this.parseLocationHash();
+      },
+
+      keys: function(input) {
+        return Object.keys(input);
+      },
+
+      parseLocationHash: function() {
+        this.route = window.location.hash;
+        console.log("TODO reload the doc");
+      },
+
+      computeRouteMimeType: function(mimeType) {
+        switch(mimeType) {
+          case "text/html":
+          case "text/html;content-disposition:polymer":
+          case "text/x-markdown":
+          case "text/plain":
+            return mimeType;
+          case "":
+            return "blank";
+          default:
+            return "unknown";
+        }
+      },
+      computeHierarchy: function(sourceSet) {
+        var hierarchy = {};
+        for (var k in sourceSet) {
+          hierarchy[k] = [];
+          sourceSet[k].forEach( function(url) {
+            var baseName = url.substring(url.lastIndexOf('/')+1);
+            var name = baseName.substring(0, baseName.lastIndexOf('.'));
+            var href;
+            if (k.match(/^test/i)) {
+             // WCT cant run in iframe, tests are opened in new window
+              href = url;
+            }
+            else {
+              href = "#" + baseName;
+              if (href in this.hashUrlMap) {// hash colision, pick a new one
+                var i=1, newHref = href;
+                while (newHref in this.hashUrlMap)
+                  newHref = href + i;
+                href = newHref;
+              }
+              this.hashUrlMap[href] = url;
+              if ( k.match(/^docu/i))
+                this.plainHtmlUrls[url] = true;
+            }
+            hierarchy[k].push({ name: name, href: href});
+          }.bind(this));
+          if (hierarchy[k].length == 0)
+            delete hierarchy[k];
+        }
+        return hierarchy;
+      },
+
+      // docs loaded by ajax
+      docLoaded: function(ev) {
+        var url = ev.target.url;
+        if (ev.detail.response !== 200) {
+          this.urlDataMap[ url ] = {
+            mimeType: 'text/plain',
+            data: "url " + url + " could not be loaded. HTTP: " + ev.detail.response
+          };
+        }
+        else {
+          var mimeType = ev.detail.xhr.getResponseHeader('Content-Type');
+          mimeType = mimeType.substring(0, mimeType.lastIndexOf(';'));
+          var data = ev.detail.xhr.responseText;
+
+          if (mimeType === "text/html" && !(url in this.plainHtmlUrls)) {
+            data = this.processPolymerDoc( data, url);
+            data = data.classes[0];
+            mimeType = "text/html;content-disposition:polymer"
+          }
+
+          this.urlDataMap[ url ] = {
+            mimeType: mimeType,
+            data: data
+          }
+        }
+      },
+      // Code lifted from context-free-parser.html
+      processPolymerDoc: function(data,url) {
+        var entities = ContextFreeParser.parse(data);
+        if (!entities || entities.length === 0) {
+          entities = [
+            {name: url.substring(url.lastIndexOf('/')+1), 
+            description: '**Undocumented**'}
+          ];
+        }
+        return { classes: entities };
       },
 
       /**
@@ -99,6 +221,9 @@ Polymer-style docs for your own site
 
     });
 
+    PolymerExpressions.prototype.capitalize = function(input) {
+      return Object.keys(input);
+    };
   </script>
 
 </polymer-element>

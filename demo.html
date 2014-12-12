@@ -18,13 +18,24 @@
 </head>
 <body>
   <sanity-check></sanity-check>
-  <template id="auto-fancy-doc-viewer" is="auto-binding" sourceSet="{{sourceSet}}">
-    <fancy-doc-viewer sources="{{sourceSet}}"></fancy-doc-viewer>
+  <template id="auto" is="auto-binding" sourceSet="{{sourceSet}}">
+    <fancy-doc-viewer sourceSet="{{sourceSet}}"></fancy-doc-viewer>
   </template>
 <script>
-  document.querySelector("#auto-fancy-doc-viewer").sourceSet = {
+  document.querySelector("#auto").sourceSet = {
+    Documents: [
+      "README.md",
+      "docs/READMEHTML.html",
+      "docs/READMETXT.txt"
+    ],
     Elements: [
-      "/fancy-doc-viewer/fancy-doc-viewer.html",
+      "fancy-doc-viewer.html",
+    ],
+    Tests: [
+      "test/index.html"
+    ],
+    Bower: [
+      "../core-drawer-panel/core-drawer-panel.html"
     ]
   }
 </script>

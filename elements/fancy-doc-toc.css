@@ -1,3 +1,7 @@
 :host {
   display: block;
 }
+
+core-menu /deep/  #icon {
+  margin-right: 8px;
+}

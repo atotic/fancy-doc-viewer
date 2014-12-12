@@ -34,7 +34,7 @@
   <script>
   "use strict";
   Polymer({
-    selected: [0,1,2,3,4],
+    selected: [0,1,2,3,4], // open all the menus
     /**
       Hierarchy specifes toc menu
       @attribute hierarchy
@@ -111,13 +111,14 @@
     iconTitleMap: [
       { regex: /element/i, icon: "polymer" },
       { regex: /test/i, icon: "check" },
-      { regex: /doc/i, icon: "info"}
+      { regex: /doc/i, icon: "info"},
+      { regex: /bower/i, icon: "translate"}
     ],
     computed: {
       menuData: 'menuFromHierarchy(hierarchy)'
     },
     created: function() {
-      this.hierarchy.elements[0].title = 'submenu';
+      this.hierarchy.elements[0].title = 'ui';
     },
     domReady: function() {
       var coreMenu = this.shadowRoot.querySelector('core-menu');
@@ -133,7 +134,7 @@
             }
           }
         );
-      // Open up all the nested menus
+      // Open up all the nested submenus
       Array.prototype.slice.call( 
         this.shadowRoot.querySelectorAll('core-menu /deep/ core-submenu core-submenu'),
         0
@@ -154,12 +155,12 @@
     },
     createItem: function(itemTemplate, title) {
       if (Array.isArray(itemTemplate)) {
-        if (!title) debugger;
+        if (!title) console.error('menu has no title');
         title = title || "undefined";
         var icon = this.getIcon(title);
         var menu = {
           type: 'menu',
-          title: PolymerExpressions.prototype.capitalize( title || "untiltled" ),
+          title: title,
           icon: icon ? icon : "radio-button-off",
           items: []
         }
@@ -188,10 +189,11 @@
       return topMenu;
     }
   });
-  // global capitalize filter
-  PolymerExpressions.prototype.capitalize = function(input) {
-      return input.charAt(0).toUpperCase() + input.slice(1);
-  };
+  
+
+  // PolymerExpressions.prototype.capitalize = function(input) {
+  //     return input.charAt(0).toUpperCase() + input.slice(1);
+  // };
 
   </script>
 </polymer-element>

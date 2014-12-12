@@ -19,7 +19,9 @@
     "/tests/"
   ],
   "dependencies": {
+    "core-ajax": "Polymer/core-ajax",
     "core-drawer-panel": "Polymer/core-drawer-panel",
+    "core-doc-viewer": "Polymer/core-doc-viewer",
     "core-header-panel": "Polymer/core-header-panel",
     "core-icon-button": "Polymer/core-icon-button",
     "core-icons": "Polymer/core-icons",
