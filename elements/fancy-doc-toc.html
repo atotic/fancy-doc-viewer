@@ -37,22 +37,22 @@
     selected: [0,1,2,3,4], // open all the menus
     /**
      * Hierarchy specifes toc menu.
-      @attribute hierarchy
-      @type Object
-      @example
-      *<pre>hierarchy: {
-      *       documents: [
-      *         { name: "README", href: "#README.md"},
-      *         { name: "TODO", href: "#TODO.txt"}
-      *       ],
-      *     elements: [
-      *         { name: "my-menu", href: "#my-menu.html"},
-      *         { name: "my-app", href: "#my-app.html"}
-      *     ],
-      *     tests: [
-      *         { name: "all", href: "/test/all-tests.html"}
-      *     ]
-      * }</pre>
+     *
+     *<pre>hierarchy: {
+     *       documents: [
+     *         { name: "README", href: "#README.md"},
+     *         { name: "TODO", href: "#TODO.txt"}
+     *       ],
+     *     elements: [
+     *         { name: "my-menu", href: "#my-menu.html"},
+     *         { name: "my-app", href: "#my-app.html"}
+     *     ],
+     *     tests: [
+     *         { name: "all", href: "/test/all-tests.html"}
+     *     ]
+     * }</pre>
+     @attribute hierarchy
+     @type Object
      */
     hierarchy: {},
     /**
@@ -87,7 +87,8 @@
       { regex: /element/i, icon: "polymer" },
       { regex: /test/i, icon: "check" },
       { regex: /doc/i, icon: "info"},
-      { regex: /bower/i, icon: "translate"}
+      { regex: /bower/i, icon: "translate"},
+      { regex: /reference/i, icon: "link"}
     ],
     computed: {
       menuData: 'menuFromHierarchy(hierarchy)'

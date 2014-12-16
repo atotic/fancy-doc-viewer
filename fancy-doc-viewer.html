@@ -187,11 +187,19 @@ Bower: [ "../core-drawer-panel/core-drawer-panel.html"...]
         for (var k in sourceSet) {
           hierarchy[k] = [];
           sourceSet[k].forEach( function(url) {
-            var baseName = url.substring(url.lastIndexOf('/')+1);
-            var name = baseName.substring(0, baseName.lastIndexOf('.'));
+            var noslash = url[url.length -1] == "/" 
+              ? url.substring(0, url.length - 1) 
+              : url;
+            var baseName = noslash.substring(noslash.lastIndexOf('/')+1);
+            var name = baseName.lastIndexOf('.') != -1 
+              ? baseName.substring(0, baseName.lastIndexOf('.'))
+              : baseName;
+            if (name.length < 3)
+              debugger;
             var href;
-            if (k.match(/^test/i)) {
+            if (k.match(/^test/i) || url.match(/^https?/) ) {
              // WCT cant run in iframe, tests are opened in new window
+             // Bunch of my references 
               href = url;
             }
             else {

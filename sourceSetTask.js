@@ -11,7 +11,9 @@ var sourceSet = {
   Tests: ["test/index.html"],
   Bower: [],
   References: [
-    "https://www.polymer-project.org/docs/polymer/polymer.html"
+    "https://www.polymer-project.org/docs/polymer/polymer.html",
+    "https://help.github.com/articles/user-organization-and-project-pages/",
+    "https://www.polymer-project.org/docs/start/reusableelements.html"
   ]
 }
 var docFolder = "docs";
@@ -30,7 +32,7 @@ elementFiles.forEach( function(name) {
 });
 
 var bowerFolders = fs.readdirSync(bowerFolder);
-var bowerRoot = "/";
+var bowerRoot = "../";
 
 // assume every folder that contains <folder_name>.html file
 // is a polymer element

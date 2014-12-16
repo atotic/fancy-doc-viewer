@@ -12,6 +12,7 @@ and the payoff comes 6 months later: "Did I really write this?"
 for all the other components used by your project, plus your txt and markdown docs.
 
 ## [Demo](demo.html) 
+Try a [demo](demo.html) 
 ### 
 
 ## Development
