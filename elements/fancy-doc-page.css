@@ -1,6 +1,11 @@
 :host {
-  margin: 8px;
   display: block;
+}
+pre, marked-element {
+  margin: 8px 8px 0 8px;
+}
+marked-element {
+  display:block;
 }
 iframe {
   width: 100%;

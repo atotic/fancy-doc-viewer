@@ -14,18 +14,18 @@
   <template>
     <link rel="stylesheet" href="fancy-doc-toc.css">
     <core-menu id="main" multi notap selected="{{selected}}" selectedItem="{{item}}">
-      <template repeat="{{menuData}}" id="submenu">
-        <template if="{{type === 'menu'}}">
+      <template id="submenu" repeat="{{menuData}}" >
+        <template if="{{type === 'menu'}}"> <!-- submenus -->
           <core-submenu label="{{title}}" icon="{{icon}}">
             <template ref="submenu" repeat="{{items}}"></template>
           </core-submenu>
         </template>
-        <template if="{{type !== 'menu'}}">
+        <template if="{{type !== 'menu'}}"> <!-- menu items -->
           <template if="{{href[0] != '#'}}">
-            <core-item><a href="{{href}}" target="_new">{{title}}</a></core-item>
+            <core-item icon="open-in-new" label="{{title}}"><a href="{{href}}" target="_new"></a></core-item>
           </template>
           <template if="{{href[0] === '#'}}">
-            <core-item><a href="{{href}}">{{title}}</a></core-item>
+            <core-item label="{{title}}"><a href="{{href}}"></a></core-item>
           </template>
         </template>
       </template>
@@ -36,54 +36,29 @@
   Polymer({
     selected: [0,1,2,3,4], // open all the menus
     /**
-      Hierarchy specifes toc menu
+     * Hierarchy specifes toc menu.
       @attribute hierarchy
       @type Object
       @example
-      hierarchy: {
-        documents: [
-          { name: "doc1", href: "#yo"},
-          { name: "doc2", href: "#yo"},
-          { name: "doc3", href: "#yo"}
-        ],
-        elements: [
-          { name: "el1", href: "#el"},
-          { name: "el2", href: "#el"},
-          { name: "el3", href: "#el"},
-          { name: "el4", href: "#el"}
-        ],
-        tests: [
-          { name: "all", href: "#el"}
-        ]
-    }
+      *<pre>hierarchy: {
+      *       documents: [
+      *         { name: "README", href: "#README.md"},
+      *         { name: "TODO", href: "#TODO.txt"}
+      *       ],
+      *     elements: [
+      *         { name: "my-menu", href: "#my-menu.html"},
+      *         { name: "my-app", href: "#my-app.html"}
+      *     ],
+      *     tests: [
+      *         { name: "all", href: "/test/all-tests.html"}
+      *     ]
+      * }</pre>
      */
-    hierarchy: {
-        documents: [
-          { name: "doc1", href: "#yo"},
-          { name: "doc2", href: "#yo"},
-          { name: "doc3", href: "#yo"}
-        ],
-        elements: [
-          [
-            { name: "el1.1", href: "#el"},
-            { name: "el2.1", href: "#el"},
-            { name: "el3.1", href: "#el"},
-          ],
-          { name: "el1", href: "#el"},
-          { name: "el2", href: "#el"},
-          { name: "el3", href: "#el"},
-          { name: "el4", href: "#el"}
-        ],
-        tests: [
-          { name: "all", href: "#el"}
-        ]
-    },
+    hierarchy: {},
     /**
-     Internal representation of menu hierarchy
+     * Internal representation of menu hierarchy
      @property menuData
      @type Array
-     @example
-
      */
     // menuData: [
     //   { 
@@ -105,7 +80,7 @@
     //   ]
     //  }
     // ],
-    /**
+    /*
      maps menu titles to icons
      */
     iconTitleMap: [
@@ -116,9 +91,6 @@
     ],
     computed: {
       menuData: 'menuFromHierarchy(hierarchy)'
-    },
-    created: function() {
-      this.hierarchy.elements[0].title = 'ui';
     },
     domReady: function() {
       var coreMenu = this.shadowRoot.querySelector('core-menu');

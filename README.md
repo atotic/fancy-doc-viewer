@@ -1,12 +1,17 @@
 fancy-doc-viewer
 ============
 
-## Usage
+## What
 Polymer-style docs for your own site.
 
-### Motivation
-I've never been happy with the way I document my code.
+## Motivation
+I've never been happy with my own docs. They are a pain to maintain,
+and the payoff comes 6 months later: "Did I really write this?"
 
+`fancy-doc-viewer` is useful right away. It combines your component docs with docs
+for all the other components used by your project, plus your txt and markdown docs.
+
+## [Demo](demo.html)
 ### 
 
 ## Development
@@ -14,8 +19,7 @@ I've never been happy with the way I document my code.
 setup:
 bower install
 
-running: needs -c 1 option to avoid stale cache when you are editing documents
-http-server -c 1 ..
+running: http-server -c 1 .. # -c 1 option avoids stale cache when editing docs
 
 index:
 http://localhost:8080/fancy-doc-viewer/index.html

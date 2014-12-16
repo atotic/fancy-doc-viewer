@@ -1,7 +1,7 @@
 <!--
-  Displays documentation content
+  Displays documentation content.
 
-  Knows how to display different mime types
+  Knows how to display different mime types.
 
   @element fancy-doc-page
 -->
@@ -33,16 +33,19 @@
   <script>
     Polymer({
       /**
-       Mime type of data to display
+       * Mime type of data to display
         @attribute mimeType
+        @type string
        */
       /**
-       Data to be displayed
+       * Data to be displayed
        @attribute data
+       @type string | object
        */
       /**
-       Url to be displayed
+       * Url to be displayed
        @attribute url
+       @type string
        */
     });
   </script>

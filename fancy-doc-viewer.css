@@ -11,6 +11,18 @@
   background-color: #EEEEEE;
   font-size: 13px;
 }
+
+[drawer] /deep/ #dropShadow {
+  display: none;
+}
+
+core-toolbar {
+  background-color: #DDDDDD;
+}
+#logo {
+  background-color: #EEEEEE;
+  height: 64px;
+}
 /*fancy-doc-toc /deep/ core-submenu > core-item {
   min-height: 28px;
 }*/

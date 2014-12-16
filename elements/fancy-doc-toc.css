@@ -5,3 +5,11 @@
 core-menu /deep/  #icon {
   margin-right: 8px;
 }
+
+core-menu /deep/ core-item {
+  min-width: 24px;
+}
+
+core-menu /deep/ core-item.core-selected {
+  font-weight: normal;
+}

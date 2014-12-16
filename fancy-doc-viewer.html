@@ -8,32 +8,76 @@
 <link rel="import" href="elements/fancy-doc-page.html">
 
 <!--
-Polymer-style docs for your own site
+Polymer-style docs for your site.
 
-##### Example
-      <template id="auto" is="auto-binding" sourceSet="{{sourceSet}}">
+Displays documentation for your own elements, and all elements
+imported via bower.
+
+
+### Included
+
+- viewer for polymer elements, markdown docs, and txt files
+- easy setup, with sourceSetTask.js setup script
+
+### Installation
+
+bower install fancy-doc-viewer --save-dev
+
+### Usage
+
+`fancy-doc-viewer` displays docs hosted on your server.
+
+1) all the doc files need to be reachable by the browser. For me
+that meant moving my docs directory inside www.
+
+2) create a file to host `fancy-doc-viewer`. I suggest `index.html` inside your docs directory:
+
+      <!doctype html>
+      <html>
+      <head>
+        <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0">
+        <title>documentation</title>
+        <script src="../webcomponentsjs/webcomponents.min.js"></script>
+        <link rel="import" href="../core-ajax/core-ajax.html">
+        <link rel="import" href="../fancy-doc-viewer.html">
+      </head>
+      <body>
+        <template id="auto" is="auto-binding" sourceSet="{{sourceSet}}">
+          <core-ajax auto url="sourceSet.json" response="{{sourceSet}}"></core-ajax>
           <fancy-doc-viewer sourceSet="{{sourceSet}}"></fancy-doc-viewer>
         </template>
-      <script>
-        document.querySelector("#auto").sourceSet = {
-          Documents: [
-            "README.md",
-            "docs/READMEHTML.html",
-            "docs/READMETXT.txt"
-          ],
-          Elements: [
-            "fancy-doc-viewer.html",
-          ],
-          Tests: [
-            "test/index.html"
-          ],
-          Bower: [
-            "../core-drawer-panel/core-drawer-panel.html"
-          ]
-        }
-      </script>    
+      </body>
+      </html>
+
+3) Create a configuration file listing all the documents. The format is json:
+
+      {
+        menuName: [ url*],
+        menuName2: [ url *]
+      }
+      
+Example:
+
+      {
+        Documents: ["README.md", "docs/TODO.txt"],
+        Elements: ["fancy-doc-viewer.html", "elements/fancy-doc-page.html", "elements/fancy-doc-toc.html" ],
+        Tests: [ "test/index.html"],
+        Bower: [ "../core-drawer-panel/core-drawer-panel.html"...]
+      }
+
+I suggest creating this file with a task. See starter tast at [sourceSetTask.js](sourceSetTask.js)
+
+Some menu names are magic:
+
+HTML files inside Documents menu will be interpreted as HTML.
+HTML files everywhere else will be parsed as polymer-elements.
+
+Save your configuration file `sourceSet.json` inside docs directory next to your index.html.
+
+4) Load docs/index.html, and smile.
+
 @element fancy-doc-viewer
-@blurb Polymer-style docs for your own site.
+@blurb Polymer-style docs for your own site
 @status alpha
 @homepage http://github.com/atotic/fancy-doc-viewer
 -->
@@ -42,15 +86,23 @@ Polymer-style docs for your own site
 
   <template>
     <link rel="stylesheet" href="fancy-doc-viewer.css">
-    <core-drawer-panel drawerWidth="12em">
+    <core-drawer-panel id="drawerPanel" drawerWidth="16em">
       <core-header-panel drawer>
-        <core-toolbar>
-          <div flex></div><core-icon src="/favicon.ico"></core-icon><div flex></div>
-        </core-toolbar>
+        <div id="logo" layout horizontal>
+          <div flex self-center layout horizontal center-justified >
+            <core-icon src="/favicon.ico" alt="" ></core-icon>
+          </div>
+        </div>
         <fancy-doc-toc hierarchy="{{hierarchy}}"></fancy-doc-toc>
       </core-header-panel>
       <core-header-panel main>
-        <core-toolbar></core-toolbar>
+        <core-toolbar>
+          <core-icon id="navicon" icon="menu" 
+            on-tap="{{toggleDrawer}}" 
+            style="display:{{$.drawerPanel.narrow ? 'inline-block' : 'none'}}"
+          ></core-icon>
+          <core-item label="documentation"></core-item>
+        </core-toolbar>
         <fancy-doc-page 
           mimeType="{{urlDataMap[ hashUrlMap [ route]].mimeType}}" 
           data="{{urlDataMap[ hashUrlMap[ route] ].data}}"
@@ -69,10 +121,17 @@ Polymer-style docs for your own site
     "use strict";
     Polymer({
       /**
-       Files to parse for docs, as a hierarchy
+       * Hierarchical list of documentation files. Use sourceSetTask.js to generate.
        @attribute sourceSet
        @type object
-       */
+       @example 
+<pre>{
+Documents: ["README.md", "docs/TODO.txt"],
+Elements: ["fancy-doc-viewer.html", "elements/fancy-doc-page.html", "elements/fancy-doc-toc.html" ],
+Tests: [ "test/index.html"],
+Bower: [ "../core-drawer-panel/core-drawer-panel.html"...]
+}</pre>
+      */
       sourceSet: {
         pleaseDefineSourceSet: [],
         general: [],
@@ -84,9 +143,6 @@ Polymer-style docs for your own site
       urlDataMap: {}, // url -> { mimeType: "", data: ""}
       plainHtmlUrls: {}, // url -> true, list of html elements that should not be treated as html
       computed: {
-        /**
-         @property hierarchy
-         */
         hierarchy: 'computeHierarchy(sourceSet)',
         routeMimeType: 'computeRouteMimeType( urlDataMap[ hashUrlMap[route]].mimeType)'
       },
@@ -96,13 +152,20 @@ Polymer-style docs for your own site
         this.parseLocationHash();
       },
 
+      toggleDrawer: function() {
+        this.$.drawerPanel.togglePanel();
+      },
+
       keys: function(input) {
         return Object.keys(input);
       },
 
       parseLocationHash: function() {
         this.route = window.location.hash;
-        console.log("TODO reload the doc");
+        // hack: hashes auto-generated by core-doc-page do not have .html, monkeypatches it
+        if (!(this.route in this.hashUrlMap)  
+          && ((this.route + ".html") in this.hashUrlMap))
+          window.location.hash = this.route + ".html";
       },
 
       computeRouteMimeType: function(mimeType) {
@@ -120,6 +183,7 @@ Polymer-style docs for your own site
       },
       computeHierarchy: function(sourceSet) {
         var hierarchy = {};
+        this.hashUrlMap = {};
         for (var k in sourceSet) {
           hierarchy[k] = [];
           sourceSet[k].forEach( function(url) {
@@ -141,6 +205,8 @@ Polymer-style docs for your own site
               this.hashUrlMap[href] = url;
               if ( k.match(/^docu/i))
                 this.plainHtmlUrls[url] = true;
+              if (!window.location.hash)
+                window.location.hash = href.substring(1);
             }
             hierarchy[k].push({ name: name, href: href});
           }.bind(this));
@@ -186,37 +252,6 @@ Polymer-style docs for your own site
           ];
         }
         return { classes: entities };
-      },
-
-      /**
-       * The `sayHello` method will return a greeting.
-       *
-       * @method sayHello
-       * @param {String} greeting Pass in a specific greeting.
-       * @return {String} Returns a string greeting.
-       */
-      sayHello: function(greeting) {
-        var response = greeting || 'Hello World!';
-        return 'seed-element says, ' + response;
-      },
-
-      /**
-       * The `seed-element-lasers-success` event is fired whenever we
-       * call fireLasers.
-       *
-       * @event seed-element-lasers-success
-       * @param {Object} detail
-       *   @param {string} detail.sound An amazing sound.
-       */
-
-      /**
-       * The `fireLasers` method will fire the lasers. At least
-       * it will dispatch an event that claims lasers were fired :)
-       *
-       * @method fireLasers
-       */
-      fireLasers: function() {
-        this.fire('seed-element-lasers-success', { sound: 'Pew pew pew!' });
       }
 
     });

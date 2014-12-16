@@ -2,13 +2,10 @@
 <!doctype html>
 <html>
 <head>
-  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0">
   <title>fancy-doc-viewer Demo</title>
-
   <script src="../webcomponentsjs/webcomponents.min.js"></script>
-  <script src="../webcomponentsjs/webcomponents.min.js"></script>
-
-  <link rel="import" href="../sanity-check/sanity-check.html">
+  <link rel="import" href="../core-ajax/core-ajax.html">
   <link rel="import" href="fancy-doc-viewer.html">
   <style>
     body {
@@ -19,25 +16,8 @@
 <body>
   <sanity-check></sanity-check>
   <template id="auto" is="auto-binding" sourceSet="{{sourceSet}}">
+    <core-ajax auto url="sourceSet.json" response="{{sourceSet}}"></core-ajax>
     <fancy-doc-viewer sourceSet="{{sourceSet}}"></fancy-doc-viewer>
   </template>
-<script>
-  document.querySelector("#auto").sourceSet = {
-    Documents: [
-      "README.md",
-      "docs/READMEHTML.html",
-      "docs/READMETXT.txt"
-    ],
-    Elements: [
-      "fancy-doc-viewer.html",
-    ],
-    Tests: [
-      "test/index.html"
-    ],
-    Bower: [
-      "../core-drawer-panel/core-drawer-panel.html"
-    ]
-  }
-</script>
 </body>
 </html>
