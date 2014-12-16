@@ -11,7 +11,7 @@ and the payoff comes 6 months later: "Did I really write this?"
 `fancy-doc-viewer` is useful right away. It combines your component docs with docs
 for all the other components used by your project, plus your txt and markdown docs.
 
-## [Demo](demo.html)
+## [Demo](demo.html) 
 ### 
 
 ## Development
