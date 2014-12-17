@@ -159,13 +159,18 @@
           ( category ? categories[category] : menu).items
             .push( this.createItem(sub, sub.title)); 
         }.bind(this));
-
+        menu.items.sort(function(a, b) {
+          if (a.type === b.type)
+            return a.title.localeCompare(b.title);
+          else if (a.type == "menu")
+            return -1;
+          else
+            return 1;
+        });
         // create new items in the right menu
         return menu;
       }
       else {
-        // if (itemTemplate.category)
-        //   console.log("Have category:", itemTemplate.category);
         return {
           type: 'item',
           title: itemTemplate.name,
