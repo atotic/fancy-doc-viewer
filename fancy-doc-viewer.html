@@ -271,7 +271,7 @@ Bower: [ "../core-drawer-panel/core-drawer-panel.html"...]
       docLoaded: function(ev) {
         var url = ev.target.url;
         if (ev.detail.response !== 200) {
-          this.urlDataMap[ url ] = {
+          this.hashDataMap[ this.urlHashMap[url] ] = {
             mimeType: 'text/plain',
             data: "url " + url + " could not be loaded. HTTP: " + ev.detail.response
           };
