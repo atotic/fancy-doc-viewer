@@ -13,22 +13,22 @@
   <template>
     <link rel="stylesheet" href="fancy-doc-page.css">
     <template if="{{mimeType == 'text/plain'}}">
-      <pre>{{data}}</pre>
+      <pre id="viewer" >{{data}}</pre>
     </template>
     <template if="{{mimeType == 'text/x-markdown'}}">
-      <marked-element text="{{data}}"></marked-element>
+      <marked-element id="viewer" text="{{data}}"></marked-element>
     </template>
     <template if="{{mimeType == 'text/html'}}">
-      <iframe frameborder="0" src="{{url}}" fit></iframe>
+      <iframe id="viewer" frameborder="0" src="{{url}}" fit></iframe>
     </template>
     <template if="{{mimeType == 'text/html;content-disposition:polymer'}}">
-      <core-doc-page data="{{data}}" fit></core-doc-page>
+      <core-doc-page id="viewer" data="{{data}}" fit></core-doc-page>
     </template>
     <template if="{{mimeType == 'blank'}}">
-      <h6>This space intentionally left blank</h6>
+      <h6 id="viewer" >This space intentionally left blank</h6>
     </template>
     <template if="{{mimeType == 'unknown'}}">
-      <p>I do not know how to display mime type {{mimeType}}</p>
+      <p id="viewer" >I do not know how to display mime type {{mimeType}}</p>
     </template>
   </template>
   <script>
@@ -48,6 +48,18 @@
        @attribute url
        @type string
        */
+
+      // when data changes, we want to readjust scroll position to top
+      // 
+      dataChanged: function() {
+        var viewer = this.shadowRoot.querySelector('#viewer');
+        if (viewer) {
+          if (viewer.nodeName == "CORE-DOC-PAGE")
+            viewer = viewer.shadowRoot.querySelector('core-header-panel /deep/ #mainContainer'); 
+          viewer.scrollTop = 0;
+          viewer.scrollLeft = 0;
+        }
+      }
     });
   </script>
 </polymer-element>

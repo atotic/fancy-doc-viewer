@@ -1,8 +1,13 @@
 #! /usr/bin/env node
 
 /**
- 
+ * Generates sourceSet for fancy-doc-viewer.
+ * Customize at will.
+ *
+ * Usage: sourceSetTask.js > sourceSet.json
  */
+"use strict";
+
 var fs = require('fs');
 
 var sourceSet = {
@@ -17,20 +22,31 @@ var sourceSet = {
     "https://www.polymer-project.org/docs/start/reusableelements.html"
   ]
 }
+
+var ignores;
+
+function ignoreName(name) {
+  return ignores.some(function(p) { name.match(p) });
+}
+
 var docFolder = "docs";
 var elementsFolder = "elements";
 var bowerFolder = "..";
 
+ignores = ["sourceSet.json"];
+
 var docRoot = docFolder;
 var docFiles = fs.readdirSync(docFolder);
 docFiles.forEach(function(name) {
+  if (ignoreName(name)) return;
   sourceSet.Documents.push(docRoot + "/" + name);
 });
 
 var elementRoot = elementsFolder;
 var elementFiles = fs.readdirSync(elementsFolder);
 elementFiles.forEach( function(name) {
-  if (name.match(/\.html$/i))
+  if (ignoreName(name)) return;
+  if (name.match(/\.html$/i) || name.match(/\.js$/i)
     sourceSet.Elements.push( elementRoot + "/" + name);
 });
 

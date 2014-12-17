@@ -5,6 +5,8 @@
 <link rel="import" href="../../core-menu/core-menu.html">
 <link rel="import" href="../../core-menu/core-submenu.html">
 <link rel="import" href="../../core-item/core-item.html">
+<link rel="import" href="../../core-icons/hardware-icons.html" >
+
 
 <!--
   Displays menu hierarchy for fancy-doc-viewer
@@ -94,8 +96,6 @@
     computed: {
       menuData: 'menuFromHierarchy(hierarchy)'
     },
-    domReady: function() {
-    },
     menuDataChanged: function() {
       var coreMenu = this.shadowRoot.querySelector('core-menu');
       // in order to allow keeping multiple submenus open,
@@ -143,18 +143,20 @@
         // create category submenus
         var categories = {};
         itemTemplate.forEach( function makeCategories( sub) {
-          if (sub && sub.category && !(sub.category in categories)) {
-            categories[sub.category] = {
+          var category = sub.category ? sub.category.trim() : null;
+          if (category && !(category in categories)) {
+            categories[category] = {
               type: 'menu',
-              title: sub.category,
-              icon: "radio-button-off",
+              title: category,
+              icon: "hardware:keyboard-arrow-down",
               items: []
             };
-            menu.items.push(categories[sub.category]);
+            menu.items.push(categories[category]);
           }
         });
-        itemTemplate.forEach( function createIt( sub) {
-          ( sub.category ? categories[sub.category] : menu).items
+        itemTemplate.forEach( function createIt( sub ) {
+          var category = sub.category ? sub.category.trim() : null;
+          ( category ? categories[category] : menu).items
             .push( this.createItem(sub, sub.title)); 
         }.bind(this));
 
@@ -162,8 +164,8 @@
         return menu;
       }
       else {
-        if (itemTemplate.category)
-          console.log("Have category:", itemTemplate.category);
+        // if (itemTemplate.category)
+        //   console.log("Have category:", itemTemplate.category);
         return {
           type: 'item',
           title: itemTemplate.name,
@@ -172,7 +174,7 @@
       }
     },
     menuFromHierarchy: function(hierarchy) {
-      console.log("menuFromHierarchy");
+      // console.log("menuFromHierarchy");
       var topMenu = [];
       try {
         for (var k in hierarchy)

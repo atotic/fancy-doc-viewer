@@ -52,7 +52,7 @@
         fancyDocViewer.sourceSet = {
           Documents: [
             "/fancy-doc-viewer/README.md",
-            "/fancy-doc-viewer/README.md"
+            "/fancy-doc-viewer/README.txt"
           ],
           Elements: [
             "/fancy-doc-viewer/fancy-doc-viewer.html",
@@ -63,7 +63,6 @@
         };
         assert.equal( fancyDocViewer.hierarchy.Documents[0].name, "README");
         assert.equal( fancyDocViewer.hierarchy.Documents[0].href, "#README.md");
-        assert.equal( fancyDocViewer.hierarchy.Documents[1].href, "#README.md1");
       });
 
     });
