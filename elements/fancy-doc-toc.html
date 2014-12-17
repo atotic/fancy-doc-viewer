@@ -93,16 +93,18 @@
       { regex: /bower/i, icon: "translate"},
       { regex: /reference/i, icon: "link"}
     ],
-    computed: {
-      menuData: 'menuFromHierarchy(hierarchy)'
-    },
-    menuDataChanged: function() {
+    menuData: [], // computed from hier
+    // computed: {
+    //   menuData: 'menuFromHierarchy(hierarchy)'
+    // },
+    domReady: function() {
       var coreMenu = this.shadowRoot.querySelector('core-menu');
       // in order to allow keeping multiple submenus open,
       // we need to prevent core-menu from closing them on anchor taps
       // so, we prevent all taps, and only let non-anchor taps go through
       Polymer.addEventListener(coreMenu, 'tap', 
           function(ev) {
+            console.log("tap");
             if (ev.target.nodeName == 'CORE-SUBMENU' && ev.target.parentNode === coreMenu) {
               coreMenu.notap = false;
               coreMenu.activateHandler(ev);
@@ -110,14 +112,24 @@
             }
           }
         );
+    },
+    menuDataChanged: function() {
       // Open up all the nested submenus
-      Array.prototype.slice.call( 
-        this.shadowRoot.querySelectorAll('core-menu /deep/ core-submenu core-submenu'),
-        0
-        )
-        .forEach(function(submenu) {
-          submenu.toggle();
-        });
+      this.job('openSubmenus', function() {
+        Array.prototype.slice.call( 
+          this.shadowRoot.querySelectorAll('core-menu /deep/ core-submenu core-submenu'),
+          0
+          )
+          .forEach(function(submenu) {
+            submenu.toggle();
+          })
+        }, 250);
+    },
+    hierarchyChanged: function() {
+      // we do not make menu data a computed property for performance reasons
+      this.job('computeHierarchy', function() {
+        this.menuData = this.menuFromHierarchy(this.hierarchy);
+      }, 100);
     },
     getIcon: function(title) {
       var icon;
@@ -179,7 +191,7 @@
       }
     },
     menuFromHierarchy: function(hierarchy) {
-      // console.log("menuFromHierarchy");
+      console.log("menuFromHierarchy");
       var topMenu = [];
       try {
         for (var k in hierarchy)
