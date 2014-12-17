@@ -2,7 +2,8 @@
   "Documents": [
     "README.md",
     "docs/READMEHTML.html",
-    "docs/TODO.txt"
+    "docs/TODO.txt",
+    "docs/RELEASES.txt"
   ],
   "Elements": [
     "fancy-doc-viewer.html",
@@ -32,13 +33,13 @@
     "../core-selection/core-selection.html",
     "../core-selector/core-selector.html",
     "../core-toolbar/core-toolbar.html",
-    "../fancy-doc-viewer/fancy-doc-viewer.html",
     "../marked-element/marked-element.html",
     "../polymer/polymer.html",
     "../prettify-element/prettify-element.html",
     "../sanity-check/sanity-check.html"
   ],
   "References": [
+    "http://atotic.github.io/fancy-doc-viewer/components/fancy-doc-viewer/",
     "https://www.polymer-project.org/docs/polymer/polymer.html",
     "https://help.github.com/articles/user-organization-and-project-pages/",
     "https://www.polymer-project.org/docs/start/reusableelements.html"

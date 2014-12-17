@@ -11,6 +11,7 @@ var sourceSet = {
   Tests: ["test/index.html"],
   Bower: [],
   References: [
+    "http://atotic.github.io/fancy-doc-viewer/components/fancy-doc-viewer/",
     "https://www.polymer-project.org/docs/polymer/polymer.html",
     "https://help.github.com/articles/user-organization-and-project-pages/",
     "https://www.polymer-project.org/docs/start/reusableelements.html"
@@ -20,19 +21,21 @@ var docFolder = "docs";
 var elementsFolder = "elements";
 var bowerFolder = "..";
 
+var docRoot = docFolder;
 var docFiles = fs.readdirSync(docFolder);
 docFiles.forEach(function(name) {
-  sourceSet.Documents.push(docFolder + "/" + name);
+  sourceSet.Documents.push(docRoot + "/" + name);
 });
 
+var elementRoot = elementsFolder;
 var elementFiles = fs.readdirSync(elementsFolder);
 elementFiles.forEach( function(name) {
   if (name.match(/\.html$/i))
-    sourceSet.Elements.push( elementsFolder + "/" + name);
+    sourceSet.Elements.push( elementRoot + "/" + name);
 });
 
-var bowerFolders = fs.readdirSync(bowerFolder);
 var bowerRoot = "../";
+var bowerFolders = fs.readdirSync(bowerFolder);
 
 // assume every folder that contains <folder_name>.html file
 // is a polymer element
@@ -52,4 +55,3 @@ bowerFolders.forEach( function(folder) {
 });
 
 console.log(JSON.stringify(sourceSet, null, "  "));
-// Popula

@@ -9,6 +9,7 @@
 <!--
   Displays menu hierarchy for fancy-doc-viewer
   @element fancy-doc-toc
+  @category helper
 -->
 <polymer-element name="fancy-doc-toc" attributes="hierarchy">
   <template>
@@ -94,6 +95,8 @@
       menuData: 'menuFromHierarchy(hierarchy)'
     },
     domReady: function() {
+    },
+    menuDataChanged: function() {
       var coreMenu = this.shadowRoot.querySelector('core-menu');
       // in order to allow keeping multiple submenus open,
       // we need to prevent core-menu from closing them on anchor taps
@@ -137,10 +140,30 @@
           icon: icon ? icon : "radio-button-off",
           items: []
         }
-        itemTemplate.forEach( function createIt( sub) { menu.items.push( this.createItem(sub, sub.title)) }.bind(this));
+        // create category submenus
+        var categories = {};
+        itemTemplate.forEach( function makeCategories( sub) {
+          if (sub && sub.category && !(sub.category in categories)) {
+            categories[sub.category] = {
+              type: 'menu',
+              title: sub.category,
+              icon: "radio-button-off",
+              items: []
+            };
+            menu.items.push(categories[sub.category]);
+          }
+        });
+        itemTemplate.forEach( function createIt( sub) {
+          ( sub.category ? categories[sub.category] : menu).items
+            .push( this.createItem(sub, sub.title)); 
+        }.bind(this));
+
+        // create new items in the right menu
         return menu;
       }
       else {
+        if (itemTemplate.category)
+          console.log("Have category:", itemTemplate.category);
         return {
           type: 'item',
           title: itemTemplate.name,
@@ -149,6 +172,7 @@
       }
     },
     menuFromHierarchy: function(hierarchy) {
+      console.log("menuFromHierarchy");
       var topMenu = [];
       try {
         for (var k in hierarchy)

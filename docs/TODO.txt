@@ -1,4 +1,6 @@
 TODO.txt
 
-Element categories: group elements by @category tag into submenus
 Multiple classes in a single file
+
+DONE:
+Element categories: group elements by @category tag into submenus

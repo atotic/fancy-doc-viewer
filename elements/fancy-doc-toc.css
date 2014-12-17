@@ -7,9 +7,13 @@ core-menu /deep/  #icon {
 }
 
 core-menu /deep/ core-item {
-  min-width: 24px;
+  min-height: 24px;
 }
 
 core-menu /deep/ core-item.core-selected {
   font-weight: normal;
+}
+
+core-menu /deep/ core-submenu /deep/ #submenu{
+  margin-left: 38px;
 }

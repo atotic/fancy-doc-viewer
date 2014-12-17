@@ -80,6 +80,7 @@ Save your configuration file `sourceSet.json` inside docs directory next to your
 @blurb Polymer-style docs for your own site
 @status alpha
 @homepage http://github.com/atotic/fancy-doc-viewer
+@category main
 -->
 <script src="../context-free-parser/context-free-parser.js"></script>
 <polymer-element name="fancy-doc-viewer" attributes="sourceSet" horizontal layout>
@@ -104,15 +105,15 @@ Save your configuration file `sourceSet.json` inside docs directory next to your
           <core-item label="documentation"></core-item>
         </core-toolbar>
         <fancy-doc-page 
-          mimeType="{{urlDataMap[ hashUrlMap [ route]].mimeType}}" 
-          data="{{urlDataMap[ hashUrlMap[ route] ].data}}"
+          mimeType="{{hashDataMap[route].mimeType}}" 
+          data="{{hashDataMap[route].data}}"
           url="{{hashUrlMap[route]}}"
         >
         </fancy-doc-page>
       </core-header-panel>
     </core-drawer-panel>
     <!-- resource loading -->
-    <template repeat="{{ k in keys(hashUrlMap)}}">
+    <template repeat="{{ k in hashUrlKeys}}">
       <core-ajax auto url="{{ hashUrlMap[k] }}" on-core-complete="{{docLoaded}}"></core-ajax>
     </template>
   </template>
@@ -120,6 +121,7 @@ Save your configuration file `sourceSet.json` inside docs directory next to your
   <script>
     "use strict";
     Polymer({
+
       /**
        * Hierarchical list of documentation files. Use sourceSetTask.js to generate.
        @attribute sourceSet
@@ -132,18 +134,19 @@ Tests: [ "test/index.html"],
 Bower: [ "../core-drawer-panel/core-drawer-panel.html"...]
 }</pre>
       */
-      sourceSet: {
-        pleaseDefineSourceSet: [],
-        general: [],
-        elements: [],
-        tests: [],
-        bower: []
-      },
-      hashUrlMap: {}, // core-ajax loads data from this map
-      urlDataMap: {}, // url -> { mimeType: "", data: ""}
+      sourceSet: {},
+
+      hashDataMap: {}, // hash -> data
+      urlHashMap: {}, // url -> hash
+
       plainHtmlUrls: {}, // url -> true, list of html elements that should not be treated as html
+
+      categoryCount: 0,
+
       computed: {
-        hierarchy: 'computeHierarchy(sourceSet)',
+        hashUrlMap: 'computeHashUrlMap(sourceSet)', // core-ajax loads data from this map
+        hashUrlKeys: 'keys(hashUrlMap)', // keys from hashUrlMap
+        hierarchy: 'computeHierarchy(sourceSet, urlHashMap, categoryCount)',
         routeMimeType: 'computeRouteMimeType( urlDataMap[ hashUrlMap[route]].mimeType)'
       },
 
@@ -166,6 +169,9 @@ Bower: [ "../core-drawer-panel/core-drawer-panel.html"...]
         if (!(this.route in this.hashUrlMap)  
           && ((this.route + ".html") in this.hashUrlMap))
           window.location.hash = this.route + ".html";
+
+        if (this.route == "" && Object.keys( this.hashUrlMap).length > 0)
+          window.location.hash = this.hashUrlMap[ Object.keys(this.hashUrlMap)[0]].substring(1);
       },
 
       computeRouteMimeType: function(mimeType) {
@@ -181,50 +187,78 @@ Bower: [ "../core-drawer-panel/core-drawer-panel.html"...]
             return "unknown";
         }
       },
-      computeHierarchy: function(sourceSet) {
-        var hierarchy = {};
-        this.hashUrlMap = {};
-        for (var k in sourceSet) {
-          hierarchy[k] = [];
-          sourceSet[k].forEach( function(url) {
-            var noslash = url[url.length -1] == "/" 
+
+      basename: function(url) {
+        var noslash = url[url.length -1] == "/" 
               ? url.substring(0, url.length - 1) 
               : url;
-            var baseName = noslash.substring(noslash.lastIndexOf('/')+1);
-            var name = baseName.lastIndexOf('.') != -1 
-              ? baseName.substring(0, baseName.lastIndexOf('.'))
-              : baseName;
-            if (name.length < 3)
-              debugger;
-            var href;
+        return noslash.substring(noslash.lastIndexOf('/')+1);
+      },
+
+      // also computes inverse, urlHashMap
+      computeHashUrlMap: function(sourceSet) {
+        var createdHashes = {};
+        var hashUrlMap = {};
+        this.urlHashMap = {};
+
+        for (var k in sourceSet) {
+          sourceSet[k].forEach( function(url) {
             if (k.match(/^test/i) || url.match(/^https?/) ) {
-             // WCT cant run in iframe, tests are opened in new window
-             // Bunch of my references 
-              href = url;
+              // do not preload
             }
             else {
-              href = "#" + baseName;
-              if (href in this.hashUrlMap) {// hash colision, pick a new one
+              var href = "#" + this.basename(url);
+              if (href in createdHashes) {
                 var i=1, newHref = href;
-                while (newHref in this.hashUrlMap)
+                while (newHref in createdHashes)
                   newHref = href + i;
                 href = newHref;
               }
-              this.hashUrlMap[href] = url;
-              if ( k.match(/^docu/i))
+              createdHashes[href] = true;
+              hashUrlMap[href] = url;
+              this.urlHashMap[url] = href;
+
+              if ( k.match(/^docu/i)) // html docs in documents are plain html
                 this.plainHtmlUrls[url] = true;
-              if (!window.location.hash)
-                window.location.hash = href.substring(1);
+
             }
-            hierarchy[k].push({ name: name, href: href});
           }.bind(this));
+        }
+        return hashUrlMap;
+      },
+
+      computeHierarchy: function(sourceSet, urlHashMap) {
+        var hierarchy = {};
+
+        for (var k in sourceSet) {
+          hierarchy[k] = [];
+
+          sourceSet[k].forEach( function(url) {
+
+            var baseName = this.basename(url);
+            // name is basename wihtout extension
+            var name = baseName.lastIndexOf('.') != -1 
+              ? baseName.substring(0, baseName.lastIndexOf('.'))
+              : baseName;
+            var href = urlHashMap[url] || url;
+            // create item
+            var item = { name: name, href: href};
+            if (this.hashDataMap[href] 
+              && (typeof this.hashDataMap[href].data == 'object')
+              && ('category' in this.hashDataMap[href].data)) {
+              item.category = this.hashDataMap[href].data.category;
+            }
+
+            hierarchy[k].push(item);
+          }.bind(this));
+
           if (hierarchy[k].length == 0)
             delete hierarchy[k];
         }
         return hierarchy;
       },
 
-      // docs loaded by ajax
+      // docs loaded by ajax, store them in hashDataMap
       docLoaded: function(ev) {
         var url = ev.target.url;
         if (ev.detail.response !== 200) {
@@ -238,15 +272,21 @@ Bower: [ "../core-drawer-panel/core-drawer-panel.html"...]
           mimeType = mimeType.substring(0, mimeType.lastIndexOf(';'));
           var data = ev.detail.xhr.responseText;
 
+          // parse if needed
           if (mimeType === "text/html" && !(url in this.plainHtmlUrls)) {
             data = this.processPolymerDoc( data, url);
             data = data.classes[0];
             mimeType = "text/html;content-disposition:polymer"
           }
 
-          this.urlDataMap[ url ] = {
+          this.hashDataMap[ this.urlHashMap[url] ] = {
             mimeType: mimeType,
             data: data
+          }
+
+          if (data.category) {
+            this.categoryCount++;
+//            this.computeHierarchy(this.sourceSet, this.urlHashMap); // recompute hierarchy
           }
         }
       },
@@ -254,10 +294,10 @@ Bower: [ "../core-drawer-panel/core-drawer-panel.html"...]
       processPolymerDoc: function(data,url) {
         var entities = ContextFreeParser.parse(data);
         if (!entities || entities.length === 0) {
-          entities = [
-            {name: url.substring(url.lastIndexOf('/')+1), 
-            description: '**Undocumented**'}
-          ];
+          entities = [ {
+            name: url.substring(url.lastIndexOf('/')+1), 
+            description: '**Undocumented**'
+          } ];
         }
         return { classes: entities };
       }
