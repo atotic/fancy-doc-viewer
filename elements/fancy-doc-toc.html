@@ -104,7 +104,6 @@
       // so, we prevent all taps, and only let non-anchor taps go through
       Polymer.addEventListener(coreMenu, 'tap', 
           function(ev) {
-            console.log("tap");
             if (ev.target.nodeName == 'CORE-SUBMENU' && ev.target.parentNode === coreMenu) {
               coreMenu.notap = false;
               coreMenu.activateHandler(ev);
@@ -191,7 +190,6 @@
       }
     },
     menuFromHierarchy: function(hierarchy) {
-      console.log("menuFromHierarchy");
       var topMenu = [];
       try {
         for (var k in hierarchy)
@@ -211,5 +209,11 @@
   //     return input.charAt(0).toUpperCase() + input.slice(1);
   // };
 
+
   </script>
+  <!--
+  Just a test of multiple elements in a single page
+  @element second-element
+  @category helper
+-->
 </polymer-element>

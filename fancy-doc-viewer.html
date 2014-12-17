@@ -249,10 +249,13 @@ Bower: [ "../core-drawer-panel/core-drawer-panel.html"...]
             var href = this.urlHashMap[url] || url;
             // create item
             var item = { name: name, href: href};
+
             if (this.hashDataMap[href] 
-              && (typeof this.hashDataMap[href].data == 'object')
-              && ('category' in this.hashDataMap[href].data)) {
-              item.category = this.hashDataMap[href].data.category;
+              && (typeof this.hashDataMap[href].data == 'object')) {
+              if ('name' in this.hashDataMap[href].data)
+                item.name = this.hashDataMap[href].data.name;
+              if('category' in this.hashDataMap[href].data)
+                item.category = this.hashDataMap[href].data.category;
             }
 
             hierarchy[k].push(item);
@@ -281,6 +284,8 @@ Bower: [ "../core-drawer-panel/core-drawer-panel.html"...]
           // parse if needed
           if (mimeType === "text/html" && !(url in this.plainHtmlUrls)) {
             data = this.processPolymerDoc( data, url);
+            if (data.classes.length > 1)
+              console.warn("discarding docs, need to implement multiple classes per file");
             data = data.classes[0];
             mimeType = "text/html;content-disposition:polymer"
           }
