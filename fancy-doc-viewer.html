@@ -106,7 +106,7 @@ Save your configuration file `sourceSet.json` inside docs directory next to your
         </core-toolbar>
         <fancy-doc-page 
           mimeType="{{hashDataMap[route].mimeType}}" 
-          data="{{hashDataMap[route].data}}"
+          body="{{hashDataMap[route].body}}"
           url="{{hashUrlMap[route]}}"
         >
         </fancy-doc-page>
@@ -136,17 +136,24 @@ Bower: [ "../core-drawer-panel/core-drawer-panel.html"...]
       */
       sourceSet: {},
 
-      hashDataMap: {}, // hash -> data
+      /*
+       * hash -> data map
+       *  data structure depends on mimeType. Usually:
+       *  { mimeType: <string>, data:<mimeType dependent>
+       * 
+       */
+      hashDataMap: {}, 
+
       urlHashMap: {}, // url -> hash
 
       plainHtmlUrls: {}, // url -> true, list of html elements that should not be treated as html
 
-      categoryCount: 0,
+      recomputeHierarchy: 0, // flag to redo hierarchy. Incremented when we load polymer data that changes it
 
       computed: {
         hashUrlMap: 'computeHashUrlMap(sourceSet)', // core-ajax loads data from this map
         hashUrlKeys: 'keys(hashUrlMap)', // keys from hashUrlMap
-        hierarchy: 'computeHierarchy(sourceSet, hashUrlMap, categoryCount)',
+        hierarchy: 'computeHierarchy(sourceSet, hashUrlMap, recomputeHierarchy)',
         routeMimeType: 'computeRouteMimeType( urlDataMap[ hashUrlMap[route]].mimeType)'
       },
 
@@ -247,18 +254,51 @@ Bower: [ "../core-drawer-panel/core-drawer-panel.html"...]
               ? baseName.substring(0, baseName.lastIndexOf('.'))
               : baseName;
             var href = this.urlHashMap[url] || url;
-            // create item
-            var item = { name: name, href: href};
+            // create items
+            var items = [];
 
-            if (this.hashDataMap[href] 
-              && (typeof this.hashDataMap[href].data == 'object')) {
-              if ('name' in this.hashDataMap[href].data)
-                item.name = this.hashDataMap[href].data.name;
-              if('category' in this.hashDataMap[href].data)
-                item.category = this.hashDataMap[href].data.category;
+            var makeComplexItem = function(name, href, elementBody, idx) {
+              var item = { name: name, href: href };
+              if (('name' in elementBody) && elementBody.name)
+                item.name = elementBody.name;
+              if (('category' in elementBody) && elementBody.category)
+                item.category = elementBody.category.trim();
+              if (idx != null) {  // the splitting of data into multiple items
+                var hrefPlus = href + "-" + idx;
+                this.hashDataMap[hrefPlus] = {
+                  mimeType: "text/html;content-disposition:polymer",
+                  body: elementBody
+                }
+                item.href = hrefPlus;
+              };
+              return item;
+            }.bind(this);
+
+            var data = this.hashDataMap[href];
+            var items = [];
+
+            // complexity:
+            // if a single file has parsed into multiple items, we have to split them up
+            if ( data ) {
+              switch(data.mimeType) {
+                case "multipart":
+                  data.body.forEach( function( newBody, idx) {
+                    items.push( makeComplexItem( name, href, newBody, idx));
+                  });
+                break;
+                case  "text/html;content-disposition:polymer":
+                  items.push( makeComplexItem( name, href, data.body, null));
+                break;
+                default:
+                  items = [ {name: name, href: href} ];
+                break;
+              }
             }
+            else
+              items = [ {name: name, href: href} ];
+ 
+            items.forEach( function(item) { hierarchy[k].push(item) });
 
-            hierarchy[k].push(item);
           }.bind(this));
 
           if (hierarchy[k].length == 0)
@@ -279,28 +319,32 @@ Bower: [ "../core-drawer-panel/core-drawer-panel.html"...]
         else {
           var mimeType = ev.detail.xhr.getResponseHeader('Content-Type');
           mimeType = mimeType.substring(0, mimeType.lastIndexOf(';'));
-          var data = ev.detail.xhr.responseText;
+          var body = ev.detail.xhr.responseText;
 
           // parse if needed
           if (mimeType === "text/html" && !(url in this.plainHtmlUrls)) {
-            data = this.processPolymerDoc( data, url);
-            if (data.classes.length > 1)
-              console.warn("discarding docs, need to implement multiple classes per file");
-            data = data.classes[0];
-            mimeType = "text/html;content-disposition:polymer"
+            body = this.processPolymerDoc( body, url);
+            if (body.classes.length > 1) {
+              body = body.classes;
+              mimeType = "multipart";
+              this.recomputeHierarchy++;  // 
+            }
+            else {
+              body = body.classes[0];
+              mimeType = "text/html;content-disposition:polymer"
+            }
           }
 
           this.hashDataMap[ this.urlHashMap[url] ] = {
             mimeType: mimeType,
-            data: data
+            body: body
           }
 
-          if (data.category) {
-            this.categoryCount++;
-//            this.computeHierarchy(this.sourceSet, this.urlHashMap); // recompute hierarchy
-          }
+          if (body.category)
+            this.recomputeHierarchy++;
         }
       },
+
       // Code lifted from context-free-parser.html
       processPolymerDoc: function(data,url) {
         var entities = ContextFreeParser.parse(data);

@@ -9,20 +9,20 @@
 <link rel="import" href="../../marked-element/marked-element.html">
 <link rel="import" href="../../core-doc-viewer/elements/core-doc-page.html">
 
-<polymer-element name="fancy-doc-page" attributes="mimeType data url" fit>
+<polymer-element name="fancy-doc-page" attributes="mimeType body url" fit>
   <template>
     <link rel="stylesheet" href="fancy-doc-page.css">
     <template if="{{mimeType == 'text/plain'}}">
-      <pre id="viewer" >{{data}}</pre>
+      <pre id="viewer" >{{body}}</pre>
     </template>
     <template if="{{mimeType == 'text/x-markdown'}}">
-      <marked-element id="viewer" text="{{data}}"></marked-element>
+      <marked-element id="viewer" text="{{body}}"></marked-element>
     </template>
     <template if="{{mimeType == 'text/html'}}">
       <iframe id="viewer" frameborder="0" src="{{url}}" fit></iframe>
     </template>
     <template if="{{mimeType == 'text/html;content-disposition:polymer'}}">
-      <core-doc-page id="viewer" data="{{data}}" fit></core-doc-page>
+      <core-doc-page id="viewer" data="{{body}}" fit></core-doc-page>
     </template>
     <template if="{{mimeType == 'blank'}}">
       <h6 id="viewer" >This space intentionally left blank</h6>
@@ -40,7 +40,7 @@
        */
       /**
        * Data to be displayed
-       @attribute data
+       @attribute body
        @type string | object
        */
       /**
@@ -51,13 +51,15 @@
 
       // when data changes, we want to readjust scroll position to top
       // 
-      dataChanged: function() {
+      bodyChanged: function() {
         var viewer = this.shadowRoot.querySelector('#viewer');
         if (viewer) {
           if (viewer.nodeName == "CORE-DOC-PAGE")
-            viewer = viewer.shadowRoot.querySelector('core-header-panel /deep/ #mainContainer'); 
-          viewer.scrollTop = 0;
-          viewer.scrollLeft = 0;
+            viewer = viewer.shadowRoot.querySelector('core-header-panel /deep/ #mainContainer');
+          if (viewer) {
+            viewer.scrollTop = 0;
+            viewer.scrollLeft = 0;
+          }
         }
       }
     });
