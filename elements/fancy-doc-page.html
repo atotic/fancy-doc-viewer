@@ -54,8 +54,9 @@
       bodyChanged: function() {
         var viewer = this.shadowRoot.querySelector('#viewer');
         if (viewer) {
-          if (viewer.nodeName == "CORE-DOC-PAGE")
-            viewer = viewer.shadowRoot.querySelector('core-header-panel /deep/ #mainContainer');
+          if (viewer.nodeName == "CORE-DOC-PAGE") {
+            viewer =viewer.shadowRoot.querySelector('core-header-panel').scroller;
+          }
           if (viewer) {
             viewer.scrollTop = 0;
             viewer.scrollLeft = 0;
