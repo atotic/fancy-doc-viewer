@@ -80,7 +80,7 @@ Save your configuration file `sourceSet.json` inside docs directory next to your
 @blurb Polymer-style docs for your own site
 @status alpha
 @homepage http://github.com/atotic/fancy-doc-viewer
-@category main
+@group main
 -->
 <script src="../context-free-parser/context-free-parser.js"></script>
 <polymer-element name="fancy-doc-viewer" attributes="sourceSet" horizontal layout>
@@ -178,7 +178,7 @@ Bower: [ "../core-drawer-panel/core-drawer-panel.html"...]
           window.location.hash = this.route + ".html";
 
         if (this.route == "" && Object.keys( this.hashUrlMap).length > 0)
-          window.location.hash = this.hashUrlMap[ Object.keys(this.hashUrlMap)[0]].substring(1);
+          window.location.hash = this.hashUrlMap[ Object.keys(this.hashUrlMap)[0]];
       },
 
       hashToTitle: function(hash) {
@@ -237,6 +237,8 @@ Bower: [ "../core-drawer-panel/core-drawer-panel.html"...]
             }
           }.bind(this));
         }
+        if (Object.keys(hashUrlMap).length > 0) // force initial page load
+          this.async( this.parseLocationHash );
         return hashUrlMap;
       },
 
@@ -261,8 +263,8 @@ Bower: [ "../core-drawer-panel/core-drawer-panel.html"...]
               var item = { name: name, href: href };
               if (('name' in elementBody) && elementBody.name)
                 item.name = elementBody.name;
-              if (('category' in elementBody) && elementBody.category)
-                item.category = elementBody.category.trim();
+              if (('group' in elementBody) && elementBody.group)
+                item.group = elementBody.group.trim();
               if (idx != null) {  // the splitting of data into multiple items
                 var hrefPlus = href + "-" + idx;
                 this.hashDataMap[hrefPlus] = {
@@ -340,7 +342,7 @@ Bower: [ "../core-drawer-panel/core-drawer-panel.html"...]
             body: body
           }
 
-          if (body.category)
+          if (body.group)
             this.recomputeHierarchy++;
         }
       },

@@ -1,5 +1,9 @@
 RELEASES.txt
 
+0.0.5
+renamed @category to @group, because Polymer uses @group
+fix load of initial page for demo
+
 0.0.3
 
 - Added @category submenus

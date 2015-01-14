@@ -11,7 +11,7 @@
 <!--
   Displays menu hierarchy for fancy-doc-viewer
   @element fancy-doc-toc
-  @category helper
+  @group helper
 -->
 <polymer-element name="fancy-doc-toc" attributes="hierarchy">
   <template>
@@ -151,23 +151,23 @@
           icon: icon ? icon : "radio-button-off",
           items: []
         }
-        // create category submenus
-        var categories = {};
-        itemTemplate.forEach( function makeCategories( sub) {
-          var category = sub.category ? sub.category.trim() : null;
-          if (category && !(category in categories)) {
-            categories[category] = {
+        // create group submenus
+        var groups = {};
+        itemTemplate.forEach( function makeGroups( sub) {
+          var group = sub.group ? sub.group.trim() : null;
+          if (group && !(group in groups)) {
+            groups[group] = {
               type: 'menu',
-              title: category,
+              title: group,
               icon: "hardware:keyboard-arrow-down",
               items: []
             };
-            menu.items.push(categories[category]);
+            menu.items.push(groups[group]);
           }
         });
         itemTemplate.forEach( function createIt( sub ) {
-          var category = sub.category ? sub.category.trim() : null;
-          ( category ? categories[category] : menu).items
+          var group = sub.group ? sub.group.trim() : null;
+          ( group ? groups[group] : menu).items
             .push( this.createItem(sub, sub.title)); 
         }.bind(this));
         menu.items.sort(function(a, b) {
@@ -214,6 +214,6 @@
   <!--
   Just a test of multiple elements in a single page
   @element second-element
-  @category helper
+  @group helper
 -->
 </polymer-element>
