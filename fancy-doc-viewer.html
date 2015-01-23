@@ -320,11 +320,14 @@ Bower: [ "../core-drawer-panel/core-drawer-panel.html"...]
         }
         else {
           var mimeType = ev.detail.xhr.getResponseHeader('Content-Type');
-          mimeType = mimeType.substring(0, mimeType.lastIndexOf(';'));
+          var semi =  mimeType.lastIndexOf(';');
+          if (semi != -1)
+            mimeType = mimeType.substring(0, mimeType.lastIndexOf(';'));
           var body = ev.detail.xhr.responseText;
 
           // parse if needed
-          if (mimeType === "text/html" && !(url in this.plainHtmlUrls)) {
+          if ( ((mimeType === "text/html") || (mimeType.match( "javascript"))) 
+            && !(url in this.plainHtmlUrls)) {
             body = this.processPolymerDoc( body, url);
             if (body.classes.length > 1) {
               body = body.classes;
