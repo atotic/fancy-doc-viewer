@@ -1,0 +1,7 @@
+TODO.txt
+
+Nothing, wait for Polymer 0.8
+
+DONE:
+Element categories: group elements by @category tag into submenus
+Handle multiple elements in a single file

@@ -1,0 +1,7 @@
+{
+  "name": "fancy-doc-viewer#gh-pages",
+  "private": true,
+  "dependencies": {
+    "fancy-doc-viewer": "atotic/fancy-doc-viewer#master"
+  }
+}

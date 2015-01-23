@@ -1,0 +1,219 @@
+<!--@license MIT License Copyright (c) 2014 Aleks Totic -->
+<link rel="import" href="../../core-toolbar/core-toolbar.html">
+<link rel="import" href="../../core-header-panel/core-header-panel.html">
+<link rel="import" href="../../core-icon-button/core-icon-button.html">
+<link rel="import" href="../../core-menu/core-menu.html">
+<link rel="import" href="../../core-menu/core-submenu.html">
+<link rel="import" href="../../core-item/core-item.html">
+<link rel="import" href="../../core-icons/hardware-icons.html" >
+
+
+<!--
+  Displays menu hierarchy for fancy-doc-viewer
+  @element fancy-doc-toc
+  @group helper
+-->
+<polymer-element name="fancy-doc-toc" attributes="hierarchy">
+  <template>
+    <link rel="stylesheet" href="fancy-doc-toc.css">
+    <core-menu id="main" multi notap selected="{{selected}}" selectedItem="{{item}}">
+      <template id="submenu" repeat="{{menuData}}" >
+        <template if="{{type === 'menu'}}"> <!-- submenus -->
+          <core-submenu label="{{title}}" icon="{{icon}}">
+            <template ref="submenu" repeat="{{items}}"></template>
+          </core-submenu>
+        </template>
+        <template if="{{type !== 'menu'}}"> <!-- menu items -->
+          <template if="{{href[0] != '#'}}">
+            <core-item icon="open-in-new" label="{{title}}"><a href="{{href}}" target="_new"></a></core-item>
+          </template>
+          <template if="{{href[0] === '#'}}">
+            <core-item label="{{title}}"><a href="{{href}}"></a></core-item>
+          </template>
+        </template>
+      </template>
+    </core-menu>
+  </template>
+  <script>
+  "use strict";
+  Polymer({
+    selected: [0,1,2,3,4], // open all the menus
+    /**
+     * Hierarchy specifes toc menu.
+     *
+     *<pre>hierarchy: {
+     *       documents: [
+     *         { name: "README", href: "#README.md"},
+     *         { name: "TODO", href: "#TODO.txt"}
+     *       ],
+     *     elements: [
+     *         { name: "my-menu", href: "#my-menu.html"},
+     *         { name: "my-app", href: "#my-app.html"}
+     *     ],
+     *     tests: [
+     *         { name: "all", href: "/test/all-tests.html"}
+     *     ]
+     * }</pre>
+     @attribute hierarchy
+     @type Object
+     */
+    hierarchy: {},
+    /**
+     * Internal representation of menu hierarchy
+     @property menuData
+     @type Array
+     */
+    // menuData: [
+    //   { 
+    //     type: "menu", 
+    //     title: "documents", 
+    //     icon: "assignment", 
+    //     items: [
+    //       { title: "doc", href: "#yo"},
+    //       { title: "doc", href: "#yo"},
+    //     ]
+    //   },
+    //  { 
+    //   type: "menu", 
+    //   title: "elements", 
+    //   icon: "polymer", 
+    //   items: [
+    //    { title: "el", href: "#el"},
+    //    { title: "el", href: "#el"},
+    //   ]
+    //  }
+    // ],
+    /*
+     maps menu titles to icons
+     */
+    iconTitleMap: [
+      { regex: /element/i, icon: "polymer" },
+      { regex: /test/i, icon: "check" },
+      { regex: /doc/i, icon: "info"},
+      { regex: /bower/i, icon: "translate"},
+      { regex: /reference/i, icon: "link"}
+    ],
+    menuData: [], // computed from hier
+    // computed: {
+    //   menuData: 'menuFromHierarchy(hierarchy)'
+    // },
+    domReady: function() {
+      var coreMenu = this.shadowRoot.querySelector('core-menu');
+      // in order to allow keeping multiple submenus open,
+      // we need to prevent core-menu from closing them on anchor taps
+      // so, we prevent all taps, and only let non-anchor taps go through
+      Polymer.addEventListener(coreMenu, 'tap', 
+          function(ev) {
+            if (ev.target.nodeName == 'CORE-SUBMENU' && ev.target.parentNode === coreMenu) {
+              coreMenu.notap = false;
+              coreMenu.activateHandler(ev);
+              coreMenu.notap = true;
+            }
+          }
+        );
+    },
+    menuDataChanged: function() {
+      // Open up all the nested submenus
+      this.job('openSubmenus', function() {
+        Array.prototype.slice.call( 
+          this.shadowRoot.querySelectorAll('core-menu /deep/ core-submenu core-submenu'),
+          0
+          )
+          .forEach(function(submenu) {
+            submenu.toggle();
+          })
+        }, 250);
+    },
+    hierarchyChanged: function() {
+      // we do not make menu data a computed property for performance reasons
+      this.job('computeHierarchy', function() {
+        this.menuData = this.menuFromHierarchy(this.hierarchy);
+      }, 100);
+    },
+    getIcon: function(title) {
+      var icon;
+      this.iconTitleMap.some( function(m) { 
+        if (title.match(m.regex)) {
+          icon = m.icon;
+          return true;
+        }
+      });
+      return icon;
+    },
+    createItem: function(itemTemplate, title) {
+      if (Array.isArray(itemTemplate)) {
+        if (!title) console.error('menu has no title');
+        title = title || "undefined";
+        var icon = this.getIcon(title);
+        var menu = {
+          type: 'menu',
+          title: title,
+          icon: icon ? icon : "radio-button-off",
+          items: []
+        }
+        // create group submenus
+        var groups = {};
+        itemTemplate.forEach( function makeGroups( sub) {
+          var group = sub.group ? sub.group.trim() : null;
+          if (group && !(group in groups)) {
+            groups[group] = {
+              type: 'menu',
+              title: group,
+              icon: "hardware:keyboard-arrow-down",
+              items: []
+            };
+            menu.items.push(groups[group]);
+          }
+        });
+        itemTemplate.forEach( function createIt( sub ) {
+          var group = sub.group ? sub.group.trim() : null;
+          ( group ? groups[group] : menu).items
+            .push( this.createItem(sub, sub.title)); 
+        }.bind(this));
+        menu.items.sort(function(a, b) {
+          if (a.type === b.type)
+            return a.title.localeCompare(b.title);
+          else if (a.type == "menu")
+            return -1;
+          else
+            return 1;
+        });
+        // create new items in the right menu
+        return menu;
+      }
+      else {
+        return {
+          type: 'item',
+          title: itemTemplate.name,
+          href: itemTemplate.href
+        }
+      }
+    },
+    menuFromHierarchy: function(hierarchy) {
+      var topMenu = [];
+      try {
+        for (var k in hierarchy)
+          topMenu.push( this.createItem(hierarchy[k], k ));
+      }
+      catch(ex) {
+        console.error(ex.message);
+        console.log(ex.stack);
+        debugger;
+      }
+      return topMenu;
+    }
+  });
+  
+
+  // PolymerExpressions.prototype.capitalize = function(input) {
+  //     return input.charAt(0).toUpperCase() + input.slice(1);
+  // };
+
+
+  </script>
+  <!--
+  Just a test of multiple elements in a single page
+  @element second-element
+  @group helper
+-->
+</polymer-element>

@@ -1,0 +1,46 @@
+{
+  "name": "fancy-doc-viewer",
+  "authors": [
+    "Aleks Totic <a@totic.org>"
+  ],
+  "description": "Pretty docs for your site, polymer-style",
+  "keywords": [
+    "web-component",
+    "web-components",
+    "polymer",
+    "jsdoc"
+  ],
+  "main": "polydoc.html",
+  "license": "MIT",
+  "homepage": "https://github.com/atotic/fancy-doc-viewer/",
+  "ignore": [
+    "/.*",
+    "/tests/"
+  ],
+  "dependencies": {
+    "core-ajax": "Polymer/core-ajax",
+    "core-drawer-panel": "Polymer/core-drawer-panel",
+    "core-doc-viewer": "Polymer/core-doc-viewer",
+    "core-header-panel": "Polymer/core-header-panel",
+    "core-icon-button": "Polymer/core-icon-button",
+    "core-icons": "Polymer/core-icons",
+    "core-item": "Polymer/core-item",
+    "core-menu": "Polymer/core-menu",
+    "core-toolbar": "Polymer/core-toolbar",
+    "context-free-parser": "Polymer/context-free-parser",
+    "marked-element": "PolymerLabs/marked-element",
+    "prettify-element": "Polymer/prettify-element",
+    "web-component-tester": "Polymer/web-component-tester"
+  },
+  "devDependencies": {},
+  "_release": "f5638c6fad",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "f5638c6fad11c155245baa7df73aaf74046239e7"
+  },
+  "_source": "git://github.com/atotic/fancy-doc-viewer.git",
+  "_target": "master",
+  "_originalSource": "atotic/fancy-doc-viewer",
+  "_direct": true
+}

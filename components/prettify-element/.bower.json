@@ -1,0 +1,19 @@
+{
+  "name": "prettify-element",
+  "private": true,
+  "dependencies": {
+    "polymer": "Polymer/polymer#^0.5",
+    "google-code-prettify": "*"
+  },
+  "version": "0.5.3",
+  "homepage": "https://github.com/Polymer/prettify-element",
+  "_release": "0.5.3",
+  "_resolution": {
+    "type": "version",
+    "tag": "0.5.3",
+    "commit": "da203bbc1ef3d832a13778507eec729ea40318bd"
+  },
+  "_source": "git://github.com/Polymer/prettify-element.git",
+  "_target": "^0.5",
+  "_originalSource": "Polymer/prettify-element"
+}

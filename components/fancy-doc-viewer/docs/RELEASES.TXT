@@ -1,0 +1,12 @@
+RELEASES.txt
+
+0.0.6
+Parse js files as documentation too
+
+0.0.5
+renamed @category to @group, because Polymer uses @group
+fix load of initial page for demo
+
+0.0.3
+
+- Added @category submenus

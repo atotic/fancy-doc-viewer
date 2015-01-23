@@ -1,0 +1,68 @@
+<!--
+  Displays documentation content.
+
+  Knows how to display different mime types.
+
+  @element fancy-doc-page
+  @group helper
+-->
+<link rel="import" href="../../marked-element/marked-element.html">
+<link rel="import" href="../../core-doc-viewer/elements/core-doc-page.html">
+
+<polymer-element name="fancy-doc-page" attributes="mimeType body url" fit>
+  <template>
+    <link rel="stylesheet" href="fancy-doc-page.css">
+    <template if="{{mimeType == 'text/plain'}}">
+      <pre id="viewer" >{{body}}</pre>
+    </template>
+    <template if="{{mimeType == 'text/x-markdown'}}">
+      <marked-element id="viewer" text="{{body}}"></marked-element>
+    </template>
+    <template if="{{mimeType == 'text/html'}}">
+      <iframe id="viewer" frameborder="0" src="{{url}}" fit></iframe>
+    </template>
+    <template if="{{mimeType == 'text/html;content-disposition:polymer'}}">
+      <core-doc-page id="viewer" data="{{body}}" fit></core-doc-page>
+    </template>
+    <template if="{{mimeType == 'blank'}}">
+      <h6 id="viewer" >This space intentionally left blank</h6>
+    </template>
+    <template if="{{mimeType == 'unknown'}}">
+      <p id="viewer" >I do not know how to display mime type {{mimeType}}</p>
+    </template>
+  </template>
+  <script>
+    Polymer({
+      /**
+       * Mime type of data to display
+        @attribute mimeType
+        @type string
+       */
+      /**
+       * Data to be displayed
+       @attribute body
+       @type string | object
+       */
+      /**
+       * Url to be displayed
+       @attribute url
+       @type string
+       */
+
+      // when data changes, we want to readjust scroll position to top
+      // 
+      bodyChanged: function() {
+        var viewer = this.shadowRoot.querySelector('#viewer');
+        if (viewer) {
+          if (viewer.nodeName == "CORE-DOC-PAGE") {
+            viewer =viewer.shadowRoot.querySelector('core-header-panel').scroller;
+          }
+          if (viewer) {
+            viewer.scrollTop = 0;
+            viewer.scrollLeft = 0;
+          }
+        }
+      }
+    });
+  </script>
+</polymer-element>

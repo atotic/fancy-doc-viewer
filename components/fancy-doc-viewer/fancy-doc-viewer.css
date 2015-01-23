@@ -1,0 +1,33 @@
+/*  @license MIT License  Copyright (c) 2014 Aleks Totic */
+
+:host {
+  display: block;
+  width: 100vw;
+  min-height: 100vh;
+  font-family: RobotoDraft, Helvetica, Arial, sans-serif;
+}
+
+[drawer] {
+  background-color: #EEEEEE;
+  font-size: 13px;
+}
+
+[drawer] /deep/ #dropShadow {
+  display: none;
+}
+
+core-toolbar {
+  background-color: #DDDDDD;
+}
+#logo {
+  background-color: #EEEEEE;
+  height: 64px;
+}
+/*fancy-doc-toc /deep/ core-submenu > core-item {
+  min-height: 28px;
+}*/
+
+:host /deep/ a, a:hover, a:visited, a:link, a:active
+{
+    text-decoration: none;
+}

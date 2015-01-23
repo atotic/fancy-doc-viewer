@@ -1,0 +1,372 @@
+<!--@license MIT License Copyright (c) 2014 Aleks Totic -->
+
+<link rel="import" href="../core-drawer-panel/core-drawer-panel.html">
+<link rel="import" href="../core-header-panel/core-header-panel.html">
+<link rel="import" href="../core-ajax/core-ajax.html">
+
+<link rel="import" href="elements/fancy-doc-toc.html">
+<link rel="import" href="elements/fancy-doc-page.html">
+
+<!--
+Polymer-style docs for your site.
+
+Displays documentation for your own elements, and all elements
+imported via bower.
+
+
+### Included
+
+- viewer for polymer elements, markdown docs, and txt files
+- easy setup, with sourceSetTask.js setup script
+
+### Installation
+
+bower install fancy-doc-viewer --save-dev
+
+### Usage
+
+`fancy-doc-viewer` displays docs hosted on your server.
+
+1) all the doc files need to be reachable by the browser. For me
+that meant moving my docs directory inside www.
+
+2) create a file to host `fancy-doc-viewer`. I suggest `index.html` inside your docs directory:
+
+      <!doctype html>
+      <html>
+      <head>
+        <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0">
+        <title>documentation</title>
+        <script src="../webcomponentsjs/webcomponents.min.js"></script>
+        <link rel="import" href="../core-ajax/core-ajax.html">
+        <link rel="import" href="../fancy-doc-viewer.html">
+      </head>
+      <body>
+        <template id="auto" is="auto-binding" sourceSet="{{sourceSet}}">
+          <core-ajax auto url="sourceSet.json" response="{{sourceSet}}"></core-ajax>
+          <fancy-doc-viewer sourceSet="{{sourceSet}}"></fancy-doc-viewer>
+        </template>
+      </body>
+      </html>
+
+3) Create a configuration file listing all the documents. The format is json:
+
+      {
+        menuName: [ url*],
+        menuName2: [ url *]
+      }
+      
+Example:
+
+      {
+        Documents: ["README.md", "docs/TODO.txt"],
+        Elements: ["fancy-doc-viewer.html", "elements/fancy-doc-page.html", "elements/fancy-doc-toc.html" ],
+        Tests: [ "test/index.html"],
+        Bower: [ "../core-drawer-panel/core-drawer-panel.html"...]
+      }
+
+I suggest creating this file with a task. See starter tast at [sourceSetTask.js](sourceSetTask.js)
+
+Some menu names are magic:
+
+HTML files inside Documents menu will be interpreted as HTML.
+HTML files everywhere else will be parsed as polymer-elements.
+
+Save your configuration file `sourceSet.json` inside docs directory next to your index.html.
+
+4) Load docs/index.html, and smile.
+
+@element fancy-doc-viewer
+@blurb Polymer-style docs for your own site
+@status alpha
+@homepage http://github.com/atotic/fancy-doc-viewer
+@group main
+-->
+<script src="../context-free-parser/context-free-parser.js"></script>
+<polymer-element name="fancy-doc-viewer" attributes="sourceSet" horizontal layout>
+
+  <template>
+    <link rel="stylesheet" href="fancy-doc-viewer.css">
+    <core-drawer-panel id="drawerPanel" drawerWidth="16em">
+      <core-header-panel drawer>
+        <div id="logo" layout horizontal>
+          <div flex self-center layout horizontal center-justified >
+            <core-icon src="/favicon.ico" alt="" ></core-icon>
+          </div>
+        </div>
+        <fancy-doc-toc hierarchy="{{hierarchy}}"></fancy-doc-toc>
+      </core-header-panel>
+      <core-header-panel main>
+        <core-toolbar>
+          <core-icon id="navicon" icon="menu" 
+            on-tap="{{toggleDrawer}}" 
+            style="display:{{$.drawerPanel.narrow ? 'inline-block' : 'none'}}"
+          ></core-icon>
+          <core-item label="{{route | hashToTitle }}"></core-item>
+        </core-toolbar>
+        <fancy-doc-page 
+          mimeType="{{hashDataMap[route].mimeType}}" 
+          body="{{hashDataMap[route].body}}"
+          url="{{hashUrlMap[route]}}"
+        >
+        </fancy-doc-page>
+      </core-header-panel>
+    </core-drawer-panel>
+    <!-- resource loading -->
+    <template repeat="{{ k in hashUrlKeys}}">
+      <core-ajax auto url="{{ hashUrlMap[k] }}" on-core-complete="{{docLoaded}}"></core-ajax>
+    </template>
+  </template>
+
+  <script>
+    "use strict";
+    Polymer({
+
+      /**
+       * Hierarchical list of documentation files. Use sourceSetTask.js to generate.
+       @attribute sourceSet
+       @type object
+       @example 
+<pre>{
+Documents: ["README.md", "docs/TODO.txt"],
+Elements: ["fancy-doc-viewer.html", "elements/fancy-doc-page.html", "elements/fancy-doc-toc.html" ],
+Tests: [ "test/index.html"],
+Bower: [ "../core-drawer-panel/core-drawer-panel.html"...]
+}</pre>
+      */
+      sourceSet: {},
+
+      /*
+       * hash -> data map
+       *  data structure depends on mimeType. Usually:
+       *  { mimeType: <string>, data:<mimeType dependent>
+       * 
+       */
+      hashDataMap: {}, 
+
+      urlHashMap: {}, // url -> hash
+
+      plainHtmlUrls: {}, // url -> true, list of html elements that should not be treated as html
+
+      recomputeHierarchy: 0, // flag to redo hierarchy. Incremented when we load polymer data that changes it
+
+      computed: {
+        hashUrlMap: 'computeHashUrlMap(sourceSet)', // core-ajax loads data from this map
+        hashUrlKeys: 'keys(hashUrlMap)', // keys from hashUrlMap
+        hierarchy: 'computeHierarchy(sourceSet, hashUrlMap, recomputeHierarchy)',
+        routeMimeType: 'computeRouteMimeType( urlDataMap[ hashUrlMap[route]].mimeType)'
+      },
+
+      ready: function() {
+        window.addEventListener('hashchange', this.parseLocationHash.bind(this));
+        this.parseLocationHash();
+      },
+
+      toggleDrawer: function() {
+        this.$.drawerPanel.togglePanel();
+      },
+
+      keys: function(input) {
+        return Object.keys(input);
+      },
+
+      parseLocationHash: function() {
+        this.route = window.location.hash;
+        // hack: hashes auto-generated by core-doc-page do not have .html, monkeypatches it
+        if (!(this.route in this.hashUrlMap)  
+          && ((this.route + ".html") in this.hashUrlMap))
+          window.location.hash = this.route + ".html";
+
+        if (this.route == "" && Object.keys( this.hashUrlMap).length > 0)
+          window.location.hash = this.hashUrlMap[ Object.keys(this.hashUrlMap)[0]];
+      },
+
+      hashToTitle: function(hash) {
+        if (!hash)
+          return "";
+        return hash.substring(1).replace(".html","");
+      },
+
+      computeRouteMimeType: function(mimeType) {
+        switch(mimeType) {
+          case "text/html":
+          case "text/html;content-disposition:polymer":
+          case "text/x-markdown":
+          case "text/plain":
+            return mimeType;
+          case "":
+            return "blank";
+          default:
+            return "unknown";
+        }
+      },
+
+      basename: function(url) {
+        var noslash = url[url.length -1] == "/" 
+              ? url.substring(0, url.length - 1) 
+              : url;
+        return noslash.substring(noslash.lastIndexOf('/')+1);
+      },
+
+      // also computes inverse, urlHashMap
+      computeHashUrlMap: function(sourceSet) {
+        var createdHashes = {};
+        var hashUrlMap = {};
+        this.urlHashMap = {};
+
+        for (var k in sourceSet) {
+          sourceSet[k].forEach( function(url) {
+            if (k.match(/^test/i) || url.match(/^https?/) ) {
+              // do not preload
+            }
+            else {
+              var href = "#" + this.basename(url);
+              if (href in createdHashes) {
+                var i=1, newHref = href;
+                while (newHref in createdHashes)
+                  newHref = href + i;
+                href = newHref;
+              }
+              createdHashes[href] = true;
+              hashUrlMap[href] = url;
+              this.urlHashMap[url] = href;
+
+              if ( k.match(/^docu/i)) // html docs in documents are plain html
+                this.plainHtmlUrls[url] = true;
+
+            }
+          }.bind(this));
+        }
+        if (Object.keys(hashUrlMap).length > 0) // force initial page load
+          this.async( this.parseLocationHash );
+        return hashUrlMap;
+      },
+
+      computeHierarchy: function(sourceSet, hashUrlMap) {
+        var hierarchy = {};
+
+        for (var k in sourceSet) {
+          hierarchy[k] = [];
+
+          sourceSet[k].forEach( function(url) {
+
+            var baseName = this.basename(url);
+            // name is basename wihtout extension
+            var name = baseName.lastIndexOf('.') != -1 
+              ? baseName.substring(0, baseName.lastIndexOf('.'))
+              : baseName;
+            var href = this.urlHashMap[url] || url;
+            // create items
+            var items = [];
+
+            var makeComplexItem = function(name, href, elementBody, idx) {
+              var item = { name: name, href: href };
+              if (('name' in elementBody) && elementBody.name)
+                item.name = elementBody.name;
+              if (('group' in elementBody) && elementBody.group)
+                item.group = elementBody.group.trim();
+              if (idx != null) {  // the splitting of data into multiple items
+                var hrefPlus = href + "-" + idx;
+                this.hashDataMap[hrefPlus] = {
+                  mimeType: "text/html;content-disposition:polymer",
+                  body: elementBody
+                }
+                item.href = hrefPlus;
+              };
+              return item;
+            }.bind(this);
+
+            var data = this.hashDataMap[href];
+            var items = [];
+
+            // complexity:
+            // if a single file has parsed into multiple items, we have to split them up
+            if ( data ) {
+              switch(data.mimeType) {
+                case "multipart":
+                  data.body.forEach( function( newBody, idx) {
+                    items.push( makeComplexItem( name, href, newBody, idx));
+                  });
+                break;
+                case  "text/html;content-disposition:polymer":
+                  items.push( makeComplexItem( name, href, data.body, null));
+                break;
+                default:
+                  items = [ {name: name, href: href} ];
+                break;
+              }
+            }
+            else
+              items = [ {name: name, href: href} ];
+ 
+            items.forEach( function(item) { hierarchy[k].push(item) });
+
+          }.bind(this));
+
+          if (hierarchy[k].length == 0)
+            delete hierarchy[k];
+        }
+        return hierarchy;
+      },
+
+      // docs loaded by ajax, store them in hashDataMap
+      docLoaded: function(ev) {
+        var url = ev.target.url;
+        if (ev.detail.response !== 200) {
+          this.hashDataMap[ this.urlHashMap[url] ] = {
+            mimeType: 'text/plain',
+            data: "url " + url + " could not be loaded. HTTP: " + ev.detail.response
+          };
+        }
+        else {
+          var mimeType = ev.detail.xhr.getResponseHeader('Content-Type');
+          var semi =  mimeType.lastIndexOf(';');
+          if (semi != -1)
+            mimeType = mimeType.substring(0, mimeType.lastIndexOf(';'));
+          var body = ev.detail.xhr.responseText;
+
+          // parse if needed
+          if ( ((mimeType === "text/html") || (mimeType.match( "javascript"))) 
+            && !(url in this.plainHtmlUrls)) {
+            body = this.processPolymerDoc( body, url);
+            if (body.classes.length > 1) {
+              body = body.classes;
+              mimeType = "multipart";
+              this.recomputeHierarchy++;  // 
+            }
+            else {
+              body = body.classes[0];
+              mimeType = "text/html;content-disposition:polymer"
+            }
+          }
+
+          this.hashDataMap[ this.urlHashMap[url] ] = {
+            mimeType: mimeType,
+            body: body
+          }
+
+          if (body.group)
+            this.recomputeHierarchy++;
+        }
+      },
+
+      // Code lifted from context-free-parser.html
+      processPolymerDoc: function(data,url) {
+        var entities = ContextFreeParser.parse(data);
+        if (!entities || entities.length === 0) {
+          entities = [ {
+            name: url.substring(url.lastIndexOf('/')+1), 
+            description: '**Undocumented**'
+          } ];
+        }
+        return { classes: entities };
+      }
+
+    });
+
+    PolymerExpressions.prototype.capitalize = function(input) {
+      return Object.keys(input);
+    };
+  </script>
+
+</polymer-element>

@@ -1,0 +1,71 @@
+<!--
+    @license MIT License http://choosealicense.com/licenses/mit/
+    Copyright (c) 2014 Aleks Totic
+-->
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>fancy-doc-viewer</title>
+
+  <script src="../../webcomponentsjs/webcomponents.min.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+
+  <!-- Step 1: import the element to test -->
+  <link rel="import" href="../fancy-doc-viewer.html">
+</head>
+<body>
+
+  <!-- You use the document as a place to set up your fixtures. -->
+
+  <script>
+
+    suite("<fancy-doc-toc", function() {
+
+      var fancyDocToc = document.createElement('fancy-doc-toc');
+      test("menuFromHierarchy", function() {
+        var menu = fancyDocToc.menuFromHierarchy( {
+          documents: [
+            { name: "doc1", href: "#yo"},
+            { name: "doc", href: "#yo"},
+            { name: "doc", href: "#yo"}
+          ],
+          elements: [
+            { name: "el", href: "#el"},
+            { name: "el", href: "#el"}
+          ],
+          tests: [
+            { name: "all", href: "#el"}
+          ]
+        });
+        assert.equal( Array.isArray(menu), true);
+        assert.equal( menu[0].items[0].title, 'doc');
+      });
+    });
+
+    suite('<fancy-doc-viewer>', function() {
+      var fancyDocViewer = document.createElement('fancy-doc-viewer');
+
+      test("computeHierarchy", function() {
+        fancyDocViewer.sourceSet = {
+          Documents: [
+            "/fancy-doc-viewer/README.md",
+            "/fancy-doc-viewer/README.txt"
+          ],
+          Elements: [
+            "/fancy-doc-viewer/fancy-doc-viewer.html",
+          ],
+          Tests: [
+            "/fancy-doc-viewer/test/index.html"
+          ]
+        };
+        assert.equal( fancyDocViewer.hierarchy.Documents[0].name, "README");
+        assert.equal( fancyDocViewer.hierarchy.Documents[0].href, "#README.md");
+      });
+
+    });
+  </script>
+
+</body>
+</html>

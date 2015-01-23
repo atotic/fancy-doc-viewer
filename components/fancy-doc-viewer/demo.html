@@ -1,0 +1,23 @@
+<!-- @license MIT License  Copyright (c) 2014 Aleks Totic -->
+<!doctype html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0">
+  <title>fancy-doc-viewer Demo</title>
+  <script src="../webcomponentsjs/webcomponents.min.js"></script>
+  <link rel="import" href="../core-ajax/core-ajax.html">
+  <link rel="import" href="fancy-doc-viewer.html">
+  <style>
+    body {
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+  <sanity-check></sanity-check>
+  <template id="auto" is="auto-binding" sourceSet="{{sourceSet}}">
+    <core-ajax auto url="sourceSet.json" response="{{sourceSet}}"></core-ajax>
+    <fancy-doc-viewer sourceSet="{{sourceSet}}"></fancy-doc-viewer>
+  </template>
+</body>
+</html>
