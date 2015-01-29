@@ -23,7 +23,11 @@
 
     suite("<fancy-doc-toc", function() {
 
-      var fancyDocToc = document.createElement('fancy-doc-toc');
+      var fancyDocToc;
+      beforeEach(function() {
+        fancyDocToc = document.createElement('fancy-doc-toc');    
+      });
+      
       test("menuFromHierarchy", function() {
         var menu = fancyDocToc.menuFromHierarchy( {
           documents: [
@@ -45,8 +49,12 @@
     });
 
     suite('<fancy-doc-viewer>', function() {
-      var fancyDocViewer = document.createElement('fancy-doc-viewer');
 
+      var fancyDocViewer;
+      beforeEach(function() {
+        fancyDocViewer = document.createElement('fancy-doc-viewer');    
+      });
+      
       test("computeHierarchy", function() {
         fancyDocViewer.sourceSet = {
           Documents: [
